@@ -20,7 +20,7 @@ export function sanitizePortfolio(dirty: string): string {
         'background-color': [/.*/]
       }
     },
-    // Explicitly block everything dangerous
+    // Explicitly block everything dangerous <>
     disallowedTagsMode: 'discard'
   });
 }
