@@ -2,6 +2,7 @@ export interface Env {
   unilens_db:     D1Database;
   SESSIONS:       KVNamespace;
   unilens_images: R2Bucket;
+  R2_PUBLIC_ID:   string;
 }
 
 export interface Variables {

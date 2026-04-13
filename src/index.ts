@@ -1,7 +1,9 @@
 import { Hono } from 'hono';
 import { Env, Variables } from './types';
 import { register, login, requireAuth } from './auth';
-import { savePortfolio, getProfile } from './portfolio';
+import { savePortfolio, getProfile, getPhotographers } from './portfolio';
+import { uploadImage } from './upload';
+import { ratePhotographer } from './ratings';
 
 
 
@@ -16,9 +18,12 @@ app.get('/me', requireAuth, c => {
   const user = c.get('user');
   return c.json({ id: user.id, name: user.name, role: user.role });
 });
+app.get('/p/:slug', getProfile);
+app.get('/photographers', getPhotographers);
 
 app.post('/portfolio',  requireAuth, savePortfolio);
-app.get('/p/:slug', getProfile);
+app.post('/upload', requireAuth, uploadImage);
+app.post('/rate/:id', requireAuth, ratePhotographer);
 
 
 export default app;

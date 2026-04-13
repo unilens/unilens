@@ -20,6 +20,9 @@
 			"binding": "unilens_images"
 		}
 	],
+	"vars": {
+		"R2_PUBLIC_ID": "799589576e3c496eb6cb957b041dd0b8"
+	},
 	"kv_namespaces": [
 		{
 			"binding": "SESSIONS",

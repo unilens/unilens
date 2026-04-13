@@ -153,3 +153,26 @@ export async function getProfile(c: AppContext) {
 
   return c.html(html);
 }
+
+export async function getPhotographers(c: AppContext) {
+  const photographers = await c.env.unilens_db.prepare(`
+    SELECT
+      u.name,
+      p.slug,
+      p.bio,
+      p.university,
+      p.price_min,
+      p.price_max,
+      p.commission_open,
+      p.avatar_url,
+      ROUND(AVG(r.score), 1) AS avg_rating,
+      COUNT(r.id)            AS review_count
+    FROM photographer_profiles p
+    JOIN users u ON u.id = p.user_id
+    LEFT JOIN ratings r ON r.photographer_id = p.user_id
+    GROUP BY p.user_id
+    ORDER BY avg_rating DESC
+  `).all();
+
+  return c.json(photographers.results);
+}
