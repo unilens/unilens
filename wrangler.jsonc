@@ -6,7 +6,27 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"name": "unilens",
 	"main": "src/index.ts",
-	"compatibility_date": "2026-04-13",
+	"compatibility_date": "2025-01-01",
+	"d1_databases": [
+		{
+			"binding": "unilens_db",
+			"database_name": "unilens-db",
+			"database_id": "5e28bbbe-67d9-4f4e-8e57-c2900150056a",
+			"remote": true
+		}
+	],
+	"r2_buckets": [
+		{
+			"bucket_name": "unilens-images",
+			"binding": "unilens_images"
+		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "SESSIONS",
+			"id": "125c86aeab4e4fc48f4f50be2367c014"
+		}
+	],
 	"observability": {
 		"enabled": true
 	},
