@@ -23,3 +23,10 @@ CREATE TABLE ratings (
   created_at      INTEGER DEFAULT (unixepoch()),
   UNIQUE(photographer_id, client_id)
 );
+
+CREATE TABLE IF NOT EXISTS photographer_profiles (
+  user_id        TEXT PRIMARY KEY REFERENCES users(id),
+  bio            TEXT,
+  portfolio_html TEXT,
+  slug           TEXT UNIQUE NOT NULL
+);

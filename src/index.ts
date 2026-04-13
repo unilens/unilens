@@ -1,12 +1,24 @@
-import { Hono } from 'hono'
+import { Hono } from 'hono';
+import { Env, Variables } from './types';
+import { register, login, requireAuth } from './auth';
+import { savePortfolio, getProfile } from './portfolio';
 
-const app = new Hono<{ Bindings: Env }>()
 
-app.get('/',              c => c.text('UniLens'))
-app.get('/p/:slug',       /* render photographer profile */)
-app.post('/auth/register',/* create user */)
-app.post('/auth/login',   /* issue session token to KV */)
-app.post('/portfolio',    /* save sanitized HTML, auth required */)
-app.post('/rate/:id',     /* submit rating, client only */)
 
-export default app
+const app = new Hono<{ Bindings: Env; Variables: Variables }>();
+
+// Public routes
+app.post('/auth/register', register);
+app.post('/auth/login', login);
+
+// Protected route example
+app.get('/me', requireAuth, c => {
+  const user = c.get('user');
+  return c.json({ id: user.id, name: user.name, role: user.role });
+});
+
+app.post('/portfolio',  requireAuth, savePortfolio);
+app.get('/p/:slug', getProfile);
+
+
+export default app;

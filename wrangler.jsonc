@@ -11,8 +11,7 @@
 		{
 			"binding": "unilens_db",
 			"database_name": "unilens-db",
-			"database_id": "5e28bbbe-67d9-4f4e-8e57-c2900150056a",
-			"remote": true
+			"database_id": "6b7425ac-f93f-4707-ba13-bc31a4a1fa68"
 		}
 	],
 	"r2_buckets": [
