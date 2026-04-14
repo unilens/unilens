@@ -18,119 +18,60 @@ export function loginPage(c: AppContext) {
     body { padding: 0; }
     .page-content {
       max-width: 420px;
-      margin: 4rem auto;
+      margin: 6rem auto;
       padding: 0 1.5rem;
+      text-align: center;
     }
     .page-title {
       font-family: var(--font-serif);
-      font-size: 28px;
+      font-size: 32px;
       font-weight: 400;
       margin-bottom: 0.5rem;
     }
     .page-subtitle {
       font-size: 14px;
       color: var(--color-text-muted);
-      margin-bottom: 2rem;
+      margin-bottom: 2.5rem;
     }
-    .form-group { margin-bottom: 1.25rem; }
-    label {
-      display: block;
-      font-size: 13px;
-      font-weight: 500;
-      margin-bottom: 6px;
-    }
-    input {
-      width: 100%;
-      padding: 10px 14px;
-      font-family: var(--font-sans);
-      font-size: 14px;
+    .google-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 28px;
       border: 1.5px solid var(--color-border);
-      border-radius: var(--radius-sm);
-      outline: none;
-      transition: border-color 0.15s;
-      color: var(--color-text);
-    }
-    input:focus { border-color: var(--color-primary); }
-    .submit-btn {
-      width: 100%;
-      padding: 11px;
-      background: var(--color-primary);
-      color: white;
+      border-radius: var(--radius-full);
       font-family: var(--font-sans);
       font-size: 15px;
       font-weight: 500;
-      border: none;
-      border-radius: var(--radius-sm);
+      color: var(--color-text);
+      background: white;
       cursor: pointer;
-      transition: opacity 0.15s;
-      margin-top: 0.5rem;
+      text-decoration: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
-    .submit-btn:hover { opacity: 0.8; }
+    .google-btn:hover {
+      border-color: var(--color-primary);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
     .alt-link {
-      text-align: center;
       font-size: 13px;
       color: var(--color-text-muted);
-      margin-top: 1.25rem;
+      margin-top: 1.5rem;
     }
     .alt-link a { color: var(--color-accent); text-decoration: none; }
-    .error-msg {
-      background: #fdecea;
-      color: #a32d2d;
-      font-size: 13px;
-      padding: 10px 14px;
-      border-radius: var(--radius-sm);
-      margin-bottom: 1.25rem;
-    }
   </style>
 </head>
 <body>
   ${topbar('login')}
   <div class="page-content">
     <h1 class="page-title">Welcome back</h1>
-    <p class="page-subtitle">Log in to your UniLens account</p>
-
-    <div id="error" class="error-msg" style="display:none;"></div>
-
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input type="email" id="email" placeholder="you@university.edu">
-    </div>
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input type="password" id="password" placeholder="••••••••">
-    </div>
-    <button class="submit-btn" onclick="handleLogin()">Log in</button>
+    <p class="page-subtitle">Sign in to your UniLens account</p>
+    <a href="/auth/login" class="google-btn">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Continue with Google
+    </a>
     <p class="alt-link">Don't have an account? <a href="/register">Sign up</a></p>
   </div>
-
-  <script>
-    async function handleLogin() {
-      const email    = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const errorEl  = document.getElementById('error');
-
-      errorEl.style.display = 'none';
-
-      const res = await fetch('/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        window.location.href = '/';
-      } else {
-        errorEl.textContent = data.error ?? 'Login failed';
-        errorEl.style.display = 'block';
-      }
-    }
-
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Enter') handleLogin();
-    });
-  </script>
 </body>
 </html>`;
   return c.html(html);
@@ -150,166 +91,60 @@ export function registerPage(c: AppContext) {
     body { padding: 0; }
     .page-content {
       max-width: 420px;
-      margin: 4rem auto;
+      margin: 6rem auto;
       padding: 0 1.5rem;
+      text-align: center;
     }
     .page-title {
       font-family: var(--font-serif);
-      font-size: 28px;
+      font-size: 32px;
       font-weight: 400;
       margin-bottom: 0.5rem;
     }
     .page-subtitle {
       font-size: 14px;
       color: var(--color-text-muted);
-      margin-bottom: 2rem;
+      margin-bottom: 2.5rem;
     }
-    .form-group { margin-bottom: 1.25rem; }
-    label {
-      display: block;
-      font-size: 13px;
-      font-weight: 500;
-      margin-bottom: 6px;
-    }
-    input, select {
-      width: 100%;
-      padding: 10px 14px;
-      font-family: var(--font-sans);
-      font-size: 14px;
+    .google-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 28px;
       border: 1.5px solid var(--color-border);
-      border-radius: var(--radius-sm);
-      outline: none;
-      transition: border-color 0.15s;
-      color: var(--color-text);
-      background: white;
-    }
-    input:focus, select:focus { border-color: var(--color-primary); }
-    .role-group {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-    .role-option {
-      border: 1.5px solid var(--color-border);
-      border-radius: var(--radius-sm);
-      padding: 12px;
-      cursor: pointer;
-      text-align: center;
-      transition: border-color 0.15s, background 0.15s;
-    }
-    .role-option:hover { border-color: var(--color-primary); }
-    .role-option.selected {
-      border-color: var(--color-primary);
-      background: var(--color-primary-light);
-    }
-    .role-option .role-icon { font-size: 22px; margin-bottom: 4px; }
-    .role-option .role-label { font-size: 13px; font-weight: 500; }
-    .role-option .role-desc { font-size: 11px; color: var(--color-text-muted); margin-top: 2px; }
-    .submit-btn {
-      width: 100%;
-      padding: 11px;
-      background: var(--color-primary);
-      color: white;
+      border-radius: var(--radius-full);
       font-family: var(--font-sans);
       font-size: 15px;
       font-weight: 500;
-      border: none;
-      border-radius: var(--radius-sm);
+      color: var(--color-text);
+      background: white;
       cursor: pointer;
-      transition: opacity 0.15s;
-      margin-top: 0.5rem;
+      text-decoration: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
     }
-    .submit-btn:hover { opacity: 0.8; }
+    .google-btn:hover {
+      border-color: var(--color-primary);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
     .alt-link {
-      text-align: center;
       font-size: 13px;
       color: var(--color-text-muted);
-      margin-top: 1.25rem;
+      margin-top: 1.5rem;
     }
     .alt-link a { color: var(--color-accent); text-decoration: none; }
-    .error-msg {
-      background: #fdecea;
-      color: #a32d2d;
-      font-size: 13px;
-      padding: 10px 14px;
-      border-radius: var(--radius-sm);
-      margin-bottom: 1.25rem;
-    }
   </style>
 </head>
 <body>
   ${topbar('')}
   <div class="page-content">
-    <h1 class="page-title">Create an account</h1>
-    <p class="page-subtitle">Join UniLens as a photographer or client</p>
-
-    <div id="error" class="error-msg" style="display:none;"></div>
-
-    <div class="form-group">
-      <label for="name">Full name</label>
-      <input type="text" id="name" placeholder="Jane Smith">
-    </div>
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input type="email" id="email" placeholder="you@university.edu">
-    </div>
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input type="password" id="password" placeholder="••••••••">
-    </div>
-    <div class="form-group">
-      <label>I am a...</label>
-      <div class="role-group">
-        <div class="role-option selected" id="role-photographer" onclick="selectRole('photographer')">
-          <div class="role-icon">📷</div>
-          <div class="role-label">Photographer</div>
-          <div class="role-desc">List my portfolio</div>
-        </div>
-        <div class="role-option" id="role-client" onclick="selectRole('client')">
-          <div class="role-icon">🔍</div>
-          <div class="role-label">Client</div>
-          <div class="role-desc">Find a photographer</div>
-        </div>
-      </div>
-    </div>
-
-    <button class="submit-btn" onclick="handleRegister()">Create account</button>
+    <h1 class="page-title">Join UniLens</h1>
+    <p class="page-subtitle">Connect with photographers at your college</p>
+    <a href="/auth/login" class="google-btn">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.08 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-3.59-13.46-8.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Continue with Google
+    </a>
     <p class="alt-link">Already have an account? <a href="/login">Log in</a></p>
   </div>
-
-  <script>
-    let selectedRole = 'photographer';
-
-    function selectRole(role) {
-      selectedRole = role;
-      document.getElementById('role-photographer').classList.toggle('selected', role === 'photographer');
-      document.getElementById('role-client').classList.toggle('selected', role === 'client');
-    }
-
-    async function handleRegister() {
-      const name     = document.getElementById('name').value;
-      const email    = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      const errorEl  = document.getElementById('error');
-
-      errorEl.style.display = 'none';
-
-      const res = await fetch('/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, role: selectedRole })
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        window.location.href = '/login';
-      } else {
-        errorEl.textContent = data.error ?? 'Registration failed';
-        errorEl.style.display = 'block';
-      }
-    }
-  </script>
 </body>
 </html>`;
   return c.html(html);

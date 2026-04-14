@@ -1,8 +1,11 @@
 export interface Env {
-  unilens_db:     D1Database;
-  SESSIONS:       KVNamespace;
-  unilens_images: R2Bucket;
-  R2_PUBLIC_ID:   string;
+  unilens_db:           D1Database;
+  SESSIONS:             KVNamespace;
+  unilens_images:       R2Bucket;
+  R2_PUBLIC_ID:         string;
+  GOOGLE_CLIENT_ID:     string;
+  GOOGLE_CLIENT_SECRET: string;
+  SESSION_SECRET:       string;
 }
 
 export interface Variables {
