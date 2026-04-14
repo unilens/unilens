@@ -5,8 +5,7 @@ import { savePortfolio, getProfile, getPhotographers } from './portfolio';
 import { uploadImage } from './upload';
 import { ratePhotographer } from './ratings';
 import { homePage } from './home';
-
-
+import { loginPage, registerPage } from './pages';
 
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
@@ -23,6 +22,8 @@ app.get('/me', requireAuth, c => {
 app.get('/p/:slug', getProfile);
 app.get('/photographers', getPhotographers);
 app.get('/', homePage);
+app.get('/login',    loginPage);
+app.get('/register', registerPage);
 
 app.post('/portfolio',  requireAuth, savePortfolio);
 app.post('/upload', requireAuth, uploadImage);
