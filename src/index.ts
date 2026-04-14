@@ -4,6 +4,8 @@ import { register, login, requireAuth } from './auth';
 import { savePortfolio, getProfile, getPhotographers } from './portfolio';
 import { uploadImage } from './upload';
 import { ratePhotographer } from './ratings';
+import { homePage } from './home';
+
 
 
 
@@ -20,6 +22,7 @@ app.get('/me', requireAuth, c => {
 });
 app.get('/p/:slug', getProfile);
 app.get('/photographers', getPhotographers);
+app.get('/', homePage);
 
 app.post('/portfolio',  requireAuth, savePortfolio);
 app.post('/upload', requireAuth, uploadImage);
