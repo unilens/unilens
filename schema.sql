@@ -3,7 +3,6 @@ CREATE TABLE users (
   email     TEXT UNIQUE NOT NULL,
   role      TEXT NOT NULL CHECK(role IN ('photographer','client')),
   name      TEXT NOT NULL,
-  password_hash TEXT NOT NULL,
   created_at INTEGER DEFAULT (unixepoch())
 );
 
