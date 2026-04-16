@@ -235,7 +235,7 @@ export async function homePage(c: AppContext) {
   </style>
 </head>
 <body>
-  ${topbar('home', user.role as string)}
+  ${topbar('home', String(user?.role ?? ''))}
 <div class="page-content">
   <h1 class="hero-title">Find your photographer</h1>
 
