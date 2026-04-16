@@ -61,6 +61,7 @@ function photographerCard(p: Photographer): string {
 export async function homePage(c: AppContext) {
     const search = c.req.query('search') ?? '';
     const university = c.req.query('university') ?? '';
+    const user = c.get('user');
 
     const result = await c.env.unilens_db.prepare(`
     SELECT
@@ -234,7 +235,7 @@ export async function homePage(c: AppContext) {
   </style>
 </head>
 <body>
-  ${topbar('home')}
+  ${topbar('home', user.role as string)}
 <div class="page-content">
   <h1 class="hero-title">Find your photographer</h1>
 
