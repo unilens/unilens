@@ -90,8 +90,10 @@ export const logoSvg = `<svg width="40" height="40" viewBox="0 0 48 48" xmlns="h
 
 export function topbar(
   active: 'home' | 'photographers' | 'about' | 'login' | 'dashboard' | '',
-  userRole?: string
+  userRole?: string | unknown
 ) {
+  const isLoggedIn = userRole !== '' && userRole !== ' ' && userRole !== undefined && userRole !== null;
+  console.log(userRole);
   return `
   <nav class="topbar">
     <a href="/" class="logo">
@@ -102,9 +104,9 @@ export function topbar(
       <a href="/" ${active === 'home' ? 'style="color:var(--color-accent);"' : ''}>Home</a>
       <a href="/photographers" ${active === 'photographers' ? 'style="color:var(--color-accent);"' : ''}>Photographers</a>
       <a href="/about" ${active === 'about' ? 'style="color:var(--color-accent);"' : ''}>About</a>
-      ${userRole === 'photographer' ? `<a href="/dashboard" ${active === 'dashboard' ? 'style="color:var(--color-accent);"' : ''}>Dashboard</a>` : ''}
-      ${userRole ? '<a href="/auth/logout">Log out</a>' : `<a href="/login" ${active === 'login' ? 'style="color:var(--color-accent);"' : ''}>Log in</a>`}
-      ${!userRole ? '<a href="/register" class="btn">Sign up</a>' : ''}
+      ${isLoggedIn ? `<a href="/dashboard" ${active === 'dashboard' ? 'style="color:var(--color-accent);"' : ''}>Dashboard</a>` : ''}
+      ${isLoggedIn ? '<a href="/auth/logout">Log out</a>' : `<a href="/login" ${active === 'login' ? 'style="color:var(--color-accent);"' : ''}>Log in</a>`}
+      ${!isLoggedIn ? '<a href="/register" class="btn">Sign up</a>' : ''}
     </div>
   </nav>`;
 }

@@ -82,7 +82,7 @@ export async function homePage(c: AppContext) {
     SELECT DISTINCT university FROM photographer_profiles WHERE university IS NOT NULL ORDER BY university
   `).all<{ university: string }>();
 
-    const cards = result.results.length > 0
+  const cards = result.results.length > 0
         ? result.results.map(photographerCard).join('')
         : `<p style="grid-column:1/-1; text-align:center; color:var(--color-text-muted); padding:3rem 0;">No photographers found.</p>`;
 

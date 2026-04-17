@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 import { Env, Variables } from './types';
-import { googleLogin, googleCallback, completeRegistration, requireAuth } from './auth';
+import { googleLogin, googleCallback, completeRegistration, requireAuth, softAuth } from './auth';
 import { savePortfolio, getProfile, getPhotographers } from './portfolio';
 import { uploadImage } from './upload';
 import { ratePhotographer } from './ratings';
@@ -31,7 +31,8 @@ app.get('/auth/logout', async (c) => {
   c.header('Set-Cookie', 'session=; HttpOnly; Path=/; Max-Age=0');
   return c.redirect('/');
 });
-app.get('/p/:slug', getProfile);
+app.get('/', softAuth, homePage);
+app.get('/p/:slug', softAuth, getProfile);
 app.get('/photographers', getPhotographers);
 app.get('/', homePage);
 app.get('/login',    loginPage);

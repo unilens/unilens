@@ -126,3 +126,18 @@ export async function requireAuth(c: AppContext, next: Next) {
   c.set('user', user);
   await next();
 }
+
+export async function softAuth(c: AppContext, next: Next) {
+  const cookie = c.req.header('Cookie') ?? '';
+  const token = cookie.split(';').find(s => s.trim().startsWith('session='))?.split('=')[1];
+  if (token) {
+    const userId = await c.env.SESSIONS.get(token);
+    if (userId) {
+      const user = await c.env.unilens_db.prepare(
+        'SELECT * FROM users WHERE id = ?'
+      ).bind(userId).first();
+      if (user) c.set('user', user);
+    }
+  }
+  await next();
+}

@@ -62,7 +62,7 @@ export function loginPage(c: AppContext) {
   </style>
 </head>
 <body>
-  ${topbar('login')}
+  ${topbar('login', '')}
   <div class="page-content">
     <h1 class="page-title">Welcome back</h1>
     <p class="page-subtitle">Sign in to your UniLens account</p>
@@ -135,7 +135,7 @@ export function registerPage(c: AppContext) {
   </style>
 </head>
 <body>
-  ${topbar('')}
+  ${topbar('login', '')}
   <div class="page-content">
     <h1 class="page-title">Join UniLens</h1>
     <p class="page-subtitle">Connect with photographers at your college</p>

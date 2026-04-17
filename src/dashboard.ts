@@ -363,7 +363,7 @@ export async function dashboardPage(c: AppContext) {
   </style>
 </head>
 <body>
-  ${topbar('dashboard', user.role as string)}
+  ${topbar('dashboard', String(user?.role ?? ''))}
 
   <div class="dashboard">
 

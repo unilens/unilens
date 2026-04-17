@@ -39,7 +39,7 @@ export async function savePortfolio(c: AppContext) {
 
 export async function getProfile(c: AppContext) {
   const slug = c.req.param('slug');
-
+  const user = c.get('user');
   const profile = await c.env.unilens_db.prepare(`
     SELECT
       u.name,
@@ -185,7 +185,7 @@ export async function getProfile(c: AppContext) {
   </style>
 </head>
 <body>
-  ${topbar('')}
+  ${topbar('', String(user?.role ?? ''))}
 
   <div class="page-content">
     <div class="profile-layout">
