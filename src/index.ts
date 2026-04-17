@@ -8,6 +8,7 @@ import { homePage } from './home';
 import { loginPage, registerPage } from './pages';
 import { roleSelectPage } from './role';
 import { dashboardPage } from './dashboard';
+import { sanitizePortfolio } from './sanitize';
 
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
@@ -17,7 +18,16 @@ app.get('/auth/login',    googleLogin);
 app.get('/auth/callback', googleCallback);
 app.post('/auth/complete', completeRegistration);
 app.get('/dashboard', requireAuth, dashboardPage);
-
+app.get('/', softAuth, homePage);
+app.get('/p/:slug', softAuth, getProfile);
+app.get('/photographers', getPhotographers);
+app.get('/', homePage);
+app.get('/login',    loginPage);
+app.get('/register', registerPage);
+app.get('/register/role', roleSelectPage);
+app.post('/portfolio',  requireAuth, savePortfolio);
+app.post('/upload', requireAuth, uploadImage);
+app.post('/rate/:id', requireAuth, ratePhotographer);
 
 // Protected route example
 app.get('/me', requireAuth, c => {
@@ -31,17 +41,11 @@ app.get('/auth/logout', async (c) => {
   c.header('Set-Cookie', 'session=; HttpOnly; Path=/; Max-Age=0');
   return c.redirect('/');
 });
-app.get('/', softAuth, homePage);
-app.get('/p/:slug', softAuth, getProfile);
-app.get('/photographers', getPhotographers);
-app.get('/', homePage);
-app.get('/login',    loginPage);
-app.get('/register', registerPage);
-app.get('/register/role', roleSelectPage);
+app.post('/sanitize', requireAuth, async (c) => {
+  const { html } = await c.req.json();
+  return c.json({ html: sanitizePortfolio(html ?? '') });
+});
 
-app.post('/portfolio',  requireAuth, savePortfolio);
-app.post('/upload', requireAuth, uploadImage);
-app.post('/rate/:id', requireAuth, ratePhotographer);
 
 
 export default app;

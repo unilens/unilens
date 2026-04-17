@@ -427,7 +427,7 @@ export async function dashboardPage(c: AppContext) {
 
       <div class="form-group">
         <label>Portfolio HTML</label>
-        <textarea class="html-zone" id="portfolio-html" oninput="updatePreview()" onkeydown="handleUndo(event)">${profile?.portfolio_html ?? ''}</textarea>
+<textarea class="html-zone" id="portfolio-html" oninput="updatePreview()" onkeydown="handleUndo(event)">${(profile?.portfolio_html ?? '').replace(/<\/script>/gi, '<\\/script>')}</textarea>
       </div>
 
       <div class="bottom-bar">
@@ -482,7 +482,7 @@ export async function dashboardPage(c: AppContext) {
   <script>
     let commissionOn = ${profile?.commission_open ? 'true' : 'false'};
     let undoStack = [];
-    let avatarUrl = '${profile?.avatar_url ?? ''}';
+let avatarUrl = ${JSON.stringify(profile?.avatar_url ?? '')};
 
     function toggleCommission() {
       commissionOn = !commissionOn;
@@ -595,40 +595,55 @@ export async function dashboardPage(c: AppContext) {
     }
 
     async function saveProfile() {
-      const btn = document.getElementById('save-btn');
-      btn.disabled = true;
-      btn.textContent = 'Saving...';
+  const btn = document.getElementById('save-btn');
+  const raw = document.getElementById('portfolio-html').value;
 
-      const body = {
-        slug:            document.getElementById('slug').value,
-        bio:             document.getElementById('bio').value,
-        university:      document.getElementById('university').value,
-        price_min:       parseInt(document.getElementById('price-min').value) || null,
-        price_max:       parseInt(document.getElementById('price-max').value) || null,
-        commission_open: commissionOn ? 1 : 0,
-        avatar_url:      avatarUrl || null,
-        portfolio_html:  document.getElementById('portfolio-html').value,
-      };
+  const sanitizeRes = await fetch('/sanitize', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ html: raw })
+  });
+  const { html: sanitized } = await sanitizeRes.json();
 
-      const res = await fetch('/portfolio', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
+  if (sanitized !== raw) {
+    const ok = confirm(
+      'Your HTML contains tags or styles that will be removed or modified when saved. Proceed anyway?'
+    );
+    if (!ok) return;
+  }
 
-      const data = await res.json();
-      btn.disabled = false;
-      btn.textContent = 'Save';
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
 
-      if (res.ok) {
-        showToast('Profile saved!');
-      } else {
-        showToast('Error: ' + (data.error ?? 'Save failed'));
-      }
-    }
+  const body = {
+    slug:            document.getElementById('slug').value,
+    bio:             document.getElementById('bio').value,
+    university:      document.getElementById('university').value,
+    price_min:       parseInt(document.getElementById('price-min').value) || null,
+    price_max:       parseInt(document.getElementById('price-max').value) || null,
+    commission_open: commissionOn ? 1 : 0,
+    avatar_url:      avatarUrl || null,
+    portfolio_html:  document.getElementById('portfolio-html').value,
+  };
+
+  const res = await fetch('/portfolio', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+
+  const data = await res.json();
+  btn.disabled = false;
+  btn.textContent = 'Save';
+
+  if (res.ok) {
+    showToast('Profile saved!');
+  } else {
+    showToast('Error: ' + (data.error ?? 'Save failed'));
+  }
+}
   </script>
 </body>
 </html>`;
-
   return c.html(html);
 }

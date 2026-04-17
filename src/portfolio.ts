@@ -40,6 +40,8 @@ export async function savePortfolio(c: AppContext) {
 export async function getProfile(c: AppContext) {
   const slug = c.req.param('slug');
   const user = c.get('user');
+  const userRole = String(user?.role ?? '');
+  const isLoggedIn = userRole !== '' && userRole !== ' ' && userRole !== undefined && userRole !== null;
   const profile = await c.env.unilens_db.prepare(`
     SELECT
       u.name,
@@ -79,6 +81,45 @@ export async function getProfile(c: AppContext) {
         <circle cx="27" cy="20" r="10" fill="#333" opacity="0.8"/>
         <ellipse cx="27" cy="44" rx="16" ry="10" fill="#333" opacity="0.8"/>
        </svg>`;
+
+  // Price meta-row
+  const priceHtml = isLoggedIn
+    ? `<span class="price">$${profile.price_min ?? '?'} – $${profile.price_max ?? '?'}</span>`
+    : `<div class="locked-wrap">
+       <span class="locked-content price">$Log – $In</span>
+       <div class="locked-overlay"><a href="/login">Log in to view</a></div>
+     </div>`;
+
+  // Bio
+  const bioHtml = isLoggedIn
+    ? `<p style="font-size:14px;color:var(--color-text-muted);line-height:1.6;">${profile.bio ?? ''}</p>`
+    : `<div class="locked-wrap">
+       <p class="locked-content" style="font-size:14px;line-height:1.6;">
+         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.
+       </p>
+       <div class="locked-overlay"><a href="/login">Log in to view</a></div>
+     </div>`;
+
+  // Portfolio area
+  const portfolioHtml = isLoggedIn
+    ? `<div class="custom-area">
+       <iframe srcdoc="${profile.portfolio_html.replace(/"/g, '&quot;')}"
+         sandbox="allow-same-origin" title="${profile.name}'s portfolio"></iframe>
+     </div>`
+    : `<div class="portfolio-locked-wrap">
+       <div class="custom-area locked-content">
+         <iframe srcdoc="<html><body style='font-family:sans-serif;padding:40px;'>
+           <div style='display:grid;grid-template-columns:1fr 1fr;gap:16px;'>
+             <div style='background:#eee;height:200px;border-radius:8px;'></div>
+             <div style='background:#ddd;height:200px;border-radius:8px;'></div>
+             <div style='background:#e8e8e8;height:200px;border-radius:8px;'></div>
+             <div style='background:#d8d8d8;height:200px;border-radius:8px;'></div>
+           </div>
+         </body></html>"
+           sandbox="allow-same-origin" title="Locked portfolio"></iframe>
+       </div>
+       <div class="locked-overlay"><a href="/login">Log in to view portfolio</a></div>
+     </div>`;
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -182,6 +223,60 @@ export async function getProfile(c: AppContext) {
       border: none;
       display: block;
     }
+
+    .locked-wrap {
+  position: relative;
+  display: inline-block;
+}
+.locked-wrap .locked-content {
+  filter: blur(5px);
+  user-select: none;
+  pointer-events: none;
+}
+.locked-wrap .locked-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.locked-overlay a {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-accent);
+  background: white;
+  border: 1.5px solid var(--color-accent);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.portfolio-locked-wrap {
+  position: relative;
+}
+.portfolio-locked-wrap .locked-content {
+  filter: blur(8px);
+  pointer-events: none;
+  user-select: none;
+}
+.portfolio-locked-wrap .locked-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.3);
+}
+.portfolio-locked-wrap .locked-overlay a {
+  font-size: 15px;
+  font-weight: 600;
+  color: white;
+  background: var(--color-accent);
+  padding: 10px 28px;
+  border-radius: var(--radius-full);
+  text-decoration: none;
+}
   </style>
 </head>
 <body>
@@ -199,29 +294,23 @@ export async function getProfile(c: AppContext) {
         </div>
         <div class="meta-row">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4.5h10M3 8h6M5 11.5L8 13l3-1.5V3.5a1 1 0 00-1-1H6a1 1 0 00-1 1v8z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span class="price">$${profile.price_min ?? '?'} – $${profile.price_max ?? '?'}</span>
+          ${priceHtml}
         </div>
         ${commissionBadge}
         <div class="stars">
           ${profile.review_count > 0
-            ? stars(profile.avg_rating) + `<span class="rating-label">${profile.avg_rating} (${profile.review_count} review${profile.review_count !== 1 ? 's' : ''})</span>`
-            : '<span style="font-size:12px;color:var(--color-text-muted);">No reviews yet</span>'
-          }
+      ? stars(profile.avg_rating) + `<span class="rating-label">${profile.avg_rating} (${profile.review_count} review${profile.review_count !== 1 ? 's' : ''})</span>`
+      : '<span style="font-size:12px;color:var(--color-text-muted);">No reviews yet</span>'
+    }
         </div>
         <hr>
-        <p style="font-size:14px;color:var(--color-text-muted);line-height:1.6;">${profile.bio ?? ''}</p>
+        ${bioHtml}
       </aside>
 
       <main>
-        <p class="section-label">Portfolio</p>
-        <div class="custom-area">
-          <iframe
-            srcdoc="${profile.portfolio_html.replace(/"/g, '&quot;')}"
-            sandbox="allow-same-origin"
-            title="${profile.name}'s portfolio"
-          ></iframe>
-        </div>
-      </main>
+  <p class="section-label">Portfolio</p>
+  ${portfolioHtml}
+</main>
 
     </div>
   </div>
@@ -232,7 +321,7 @@ export async function getProfile(c: AppContext) {
 }
 
 export async function getPhotographers(c: AppContext) {
-  const search     = c.req.query('search')     ?? '';
+  const search = c.req.query('search') ?? '';
   const university = c.req.query('university') ?? '';
 
   const photographers = await c.env.unilens_db.prepare(`

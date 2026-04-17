@@ -93,7 +93,6 @@ export function topbar(
   userRole?: string | unknown
 ) {
   const isLoggedIn = userRole !== '' && userRole !== ' ' && userRole !== undefined && userRole !== null;
-  console.log(userRole);
   return `
   <nav class="topbar">
     <a href="/" class="logo">

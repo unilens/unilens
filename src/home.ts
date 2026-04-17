@@ -35,8 +35,9 @@ function avatar(p: Photographer): string {
   </svg>`;
 }
 
-function photographerCard(p: Photographer): string {
-    return `
+function photographerCard(p: Photographer, userRole?: string): string {
+  const isLoggedIn = userRole === 'photographer' || userRole === 'client';
+  return `
     <a href="/p/${p.slug}" style="display:block; text-decoration:none; color:inherit;">
       <div class="card">
         <div class="avatar-wrap">${avatar(p)}</div>
@@ -47,7 +48,11 @@ function photographerCard(p: Photographer): string {
           </div>
           <div class="meta-row">
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 4.5h10M3 8h6M5 11.5L8 13l3-1.5V3.5a1 1 0 00-1-1H6a1 1 0 00-1 1v8z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span>$${p.price_min ?? '?'} – $${p.price_max ?? '?'}</span>
+            ${
+        isLoggedIn
+          ? `<span>$${p.price_min ?? '?'} - $${p.price_max ?? '?'}</span>`
+          : `<span class="muted">Log in to view prices</span>`
+      }
           </div>
         </div>
         <div class="stars-row">${stars(p.avg_rating)}</div>
@@ -83,7 +88,7 @@ export async function homePage(c: AppContext) {
   `).all<{ university: string }>();
 
   const cards = result.results.length > 0
-        ? result.results.map(photographerCard).join('')
+        ? result.results.map(p => photographerCard(p, String(user?.role) ?? '')).join('')
         : `<p style="grid-column:1/-1; text-align:center; color:var(--color-text-muted); padding:3rem 0;">No photographers found.</p>`;
 
     const universityOptions = universities.results
