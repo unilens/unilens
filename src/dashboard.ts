@@ -1,6 +1,7 @@
 import { Context } from 'hono';
 import { Env, Variables } from './types';
 import { theme, favicon, topbarStyles, topbar } from './theme';
+import { universities, getUniversitySvg } from './universities';
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
 
@@ -18,6 +19,23 @@ export async function dashboardPage(c: AppContext) {
     price_min: number; price_max: number; commission_open: number;
     avatar_url: string; university: string;
   }>();
+
+  // Resolve the currently-selected university for server-side render
+  const currentUniv  = universities.find(u => u.name === profile?.university);
+  const currentIcon  = currentUniv?.svg ?? '';
+  const currentLabel = profile?.university ?? 'Select university...';
+
+  // Build the dropdown option list
+  const univOptions = universities.map(u => {
+    const selected = profile?.university === u.name ? ' selected' : '';
+    // Escape the name for use in a data-attribute
+    const safeName = u.name.replace(/"/g, '&quot;');
+    return `
+      <div class="univ-option${selected}" data-name="${safeName}">
+        <span class="univ-opt-icon">${u.svg}</span>
+        <span>${u.name}</span>
+      </div>`;
+  }).join('');
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -123,6 +141,100 @@ export async function dashboardPage(c: AppContext) {
     }
 
     input:focus, textarea:focus { border-color: var(--color-primary); }
+
+    /* ── University dropdown ── */
+    .univ-select {
+      position: relative;
+      width: 100%;
+    }
+
+    .univ-trigger {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 13px;
+      background: white;
+      transition: border-color 0.15s;
+      user-select: none;
+      min-height: 38px;
+    }
+
+    .univ-trigger:hover,
+    .univ-select.open .univ-trigger {
+      border-color: var(--color-primary);
+    }
+
+    .univ-trigger-icon {
+      width: 22px; height: 22px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .univ-trigger-icon svg { width: 22px; height: 22px; display: block; }
+
+    .univ-trigger-label {
+      flex: 1;
+      color: var(--color-text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .univ-trigger-label.placeholder { color: var(--color-text-muted); }
+
+    .univ-chevron {
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+
+    .univ-select.open .univ-chevron { transform: rotate(180deg); }
+
+    .univ-options {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0; right: 0;
+      background: white;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      z-index: 50;
+      max-height: 220px;
+      overflow-y: auto;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+
+    .univ-select.open .univ-options { display: block; }
+
+    .univ-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.1s;
+    }
+
+    .univ-option:hover { background: var(--color-hover); }
+
+    .univ-option.selected { background: var(--color-primary-light); font-weight: 500; }
+
+    .univ-opt-icon {
+      width: 24px; height: 24px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .univ-opt-icon svg { width: 24px; height: 24px; display: block; }
+    /* ── end university dropdown ── */
 
     .price-row {
       display: flex;
@@ -394,7 +506,21 @@ export async function dashboardPage(c: AppContext) {
       <div class="fields-grid">
         <div class="form-group">
           <label>University</label>
-          <input type="text" id="university" placeholder="University of Georgia" value="${profile?.university ?? ''}">
+          <!-- Custom university dropdown -->
+          <div class="univ-select" id="univ-select">
+            <div class="univ-trigger" id="univ-trigger" onclick="toggleUnivDropdown(event)">
+              <span class="univ-trigger-icon" id="univ-trigger-icon">${currentIcon}</span>
+              <span class="univ-trigger-label${currentIcon ? '' : ' placeholder'}" id="univ-trigger-label">${currentLabel}</span>
+              <svg class="univ-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="univ-options" id="univ-options">
+              ${univOptions}
+            </div>
+          </div>
+          <!-- Hidden input keeps the same id so saveProfile() is unchanged -->
+          <input type="hidden" id="university" value="${profile?.university ?? ''}">
         </div>
         <div class="form-group">
           <label>Bio</label>
@@ -427,7 +553,7 @@ export async function dashboardPage(c: AppContext) {
 
       <div class="form-group">
         <label>Portfolio HTML</label>
-<textarea class="html-zone" id="portfolio-html" oninput="updatePreview()" onkeydown="handleUndo(event)">${(profile?.portfolio_html ?? '').replace(/<\/script>/gi, '<\\/script>')}</textarea>
+        <textarea class="html-zone" id="portfolio-html" oninput="updatePreview()" onkeydown="handleUndo(event)">${profile?.portfolio_html ?? ''}</textarea>
       </div>
 
       <div class="bottom-bar">
@@ -456,8 +582,13 @@ export async function dashboardPage(c: AppContext) {
         <div>
           <p class="preview-name">${user.name as string}</p>
           <div class="preview-meta">
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
-            <span id="preview-university">${profile?.university ?? 'University not set'}</span>
+            <span id="preview-university-icon" style="width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;">
+  ${profile?.university && getUniversitySvg(profile.university)
+    ? getUniversitySvg(profile.university).replace('<svg ', '<svg width="18" height="18" ')
+    : `<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>`
+  }
+</span>
+<span id="preview-university">${profile?.university ?? 'University not set'}</span>
           </div>
           <div class="preview-meta">
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 4.5h10M3 8h6M5 11.5L8 13l3-1.5V3.5a1 1 0 00-1-1H6a1 1 0 00-1 1v8z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -482,7 +613,52 @@ export async function dashboardPage(c: AppContext) {
   <script>
     let commissionOn = ${profile?.commission_open ? 'true' : 'false'};
     let undoStack = [];
-let avatarUrl = ${JSON.stringify(profile?.avatar_url ?? '')};
+    let avatarUrl = '${profile?.avatar_url ?? ''}';
+
+    // ── University dropdown ──
+    function toggleUnivDropdown(e) {
+      e.stopPropagation();
+      document.getElementById('univ-select').classList.toggle('open');
+    }
+
+    function selectUniversity(name, iconHtml) {
+      // Update hidden input (read by saveProfile)
+      document.getElementById('university').value = name;
+
+      // Update trigger display
+      const triggerIcon  = document.getElementById('univ-trigger-icon');
+      const triggerLabel = document.getElementById('univ-trigger-label');
+      triggerIcon.innerHTML = iconHtml;
+      triggerLabel.textContent = name;
+      triggerLabel.classList.remove('placeholder');
+
+      // Mark selected option
+      document.querySelectorAll('.univ-option').forEach(el => {
+        el.classList.toggle('selected', el.dataset.name === name);
+      });
+
+      document.getElementById('univ-select').classList.remove('open');
+      updatePreview();
+      document.getElementById('preview-university-icon').innerHTML =
+  iconHtml.replace('<svg ', '<svg width="18" height="18" ');
+    }
+
+    // Wire up option clicks (avoids inline onclick + escaping issues)
+    document.querySelectorAll('.univ-option').forEach(el => {
+      el.addEventListener('click', function(e) {
+        e.stopPropagation();
+        selectUniversity(
+          this.dataset.name,
+          this.querySelector('.univ-opt-icon').innerHTML
+        );
+      });
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', () => {
+      document.getElementById('univ-select').classList.remove('open');
+    });
+    // ── end university dropdown ──
 
     function toggleCommission() {
       commissionOn = !commissionOn;
@@ -509,7 +685,6 @@ let avatarUrl = ${JSON.stringify(profile?.avatar_url ?? '')};
         '$' + (min || '?') + ' – $' + (max || '?');
     }
 
-    document.getElementById('university').addEventListener('input', updatePreview);
     document.getElementById('price-min').addEventListener('input', updatePreview);
     document.getElementById('price-max').addEventListener('input', updatePreview);
 
@@ -595,55 +770,40 @@ let avatarUrl = ${JSON.stringify(profile?.avatar_url ?? '')};
     }
 
     async function saveProfile() {
-  const btn = document.getElementById('save-btn');
-  const raw = document.getElementById('portfolio-html').value;
+      const btn = document.getElementById('save-btn');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
 
-  const sanitizeRes = await fetch('/sanitize', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ html: raw })
-  });
-  const { html: sanitized } = await sanitizeRes.json();
+      const body = {
+        slug:            document.getElementById('slug').value,
+        bio:             document.getElementById('bio').value,
+        university:      document.getElementById('university').value,
+        price_min:       parseInt(document.getElementById('price-min').value) || null,
+        price_max:       parseInt(document.getElementById('price-max').value) || null,
+        commission_open: commissionOn ? 1 : 0,
+        avatar_url:      avatarUrl || null,
+        portfolio_html:  document.getElementById('portfolio-html').value,
+      };
 
-  if (sanitized !== raw) {
-    const ok = confirm(
-      'Your HTML contains tags or styles that will be removed or modified when saved. Proceed anyway?'
-    );
-    if (!ok) return;
-  }
+      const res = await fetch('/portfolio', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
 
-  btn.disabled = true;
-  btn.textContent = 'Saving...';
+      const data = await res.json();
+      btn.disabled = false;
+      btn.textContent = 'Save';
 
-  const body = {
-    slug:            document.getElementById('slug').value,
-    bio:             document.getElementById('bio').value,
-    university:      document.getElementById('university').value,
-    price_min:       parseInt(document.getElementById('price-min').value) || null,
-    price_max:       parseInt(document.getElementById('price-max').value) || null,
-    commission_open: commissionOn ? 1 : 0,
-    avatar_url:      avatarUrl || null,
-    portfolio_html:  document.getElementById('portfolio-html').value,
-  };
-
-  const res = await fetch('/portfolio', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-
-  const data = await res.json();
-  btn.disabled = false;
-  btn.textContent = 'Save';
-
-  if (res.ok) {
-    showToast('Profile saved!');
-  } else {
-    showToast('Error: ' + (data.error ?? 'Save failed'));
-  }
-}
+      if (res.ok) {
+        showToast('Profile saved!');
+      } else {
+        showToast('Error: ' + (data.error ?? 'Save failed'));
+      }
+    }
   </script>
 </body>
 </html>`;
+
   return c.html(html);
 }

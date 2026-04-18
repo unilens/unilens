@@ -2,6 +2,8 @@ import { Context } from 'hono';
 import { Env, Variables, PhotographerProfile } from './types';
 import { sanitizePortfolio } from './sanitize';
 import { theme, favicon, topbarStyles, topbar } from './theme';
+import { getUniversitySvg } from './universities';
+
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
 
@@ -289,8 +291,11 @@ export async function getProfile(c: AppContext) {
         <div class="avatar">${avatarContent}</div>
         <h1 class="photographer-name">${profile.name}</h1>
         <div class="meta-row">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
-          ${profile.university ?? 'University not set'}
+          ${profile.university && getUniversitySvg(profile.university)
+  ? `<span style="width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;">${getUniversitySvg(profile.university).replace('<svg ', '<svg width="20" height="20" ')}</span>`
+  : `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>`
+}
+${profile.university ?? 'University not set'}
         </div>
         <div class="meta-row">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 4.5h10M3 8h6M5 11.5L8 13l3-1.5V3.5a1 1 0 00-1-1H6a1 1 0 00-1 1v8z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>

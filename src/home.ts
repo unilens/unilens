@@ -1,6 +1,8 @@
 import { Context } from 'hono';
 import { Env, Variables } from './types';
 import { theme, favicon, topbarStyles, topbar } from './theme';
+import { getUniversitySvg } from './universities';
+
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
 
@@ -43,8 +45,11 @@ function photographerCard(p: Photographer, userRole?: string): string {
         <div class="avatar-wrap">${avatar(p)}</div>
         <div class="card-meta">
           <div class="meta-row">
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
-            <span>${p.university ?? '—'}</span>
+            ${p.university && getUniversitySvg(p.university)
+  ? `<span style="width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;">${getUniversitySvg(p.university).replace('<svg ', '<svg width="18" height="18" ')}</span>`
+  : `<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>`
+}
+<span>${p.university ?? '—'}</span>
           </div>
           <div class="meta-row">
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 4.5h10M3 8h6M5 11.5L8 13l3-1.5V3.5a1 1 0 00-1-1H6a1 1 0 00-1 1v8z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
