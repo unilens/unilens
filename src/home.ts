@@ -96,9 +96,20 @@ export async function homePage(c: AppContext) {
         ? result.results.map(p => photographerCard(p, String(user?.role) ?? '')).join('')
         : `<p style="grid-column:1/-1; text-align:center; color:var(--color-text-muted); padding:3rem 0;">No photographers found.</p>`;
 
-    const universityOptions = universities.results
-        .map(u => `<option value="${u.university}" ${university === u.university ? 'selected' : ''}>${u.university}</option>`)
-        .join('');
+    const currentFilterIcon = university
+  ? getUniversitySvg(university).replace('<svg ', '<svg width="20" height="20" ')
+  : '';
+
+const universityOptions = universities.results.map(u => {
+  const icon = getUniversitySvg(u.university);
+  const sized = icon ? icon.replace('<svg ', '<svg width="22" height="22" ') : '';
+  const sel = university === u.university ? ' selected' : '';
+  return `
+    <div class="univ-filter-option${sel}" data-value="${u.university.replace(/"/g, '&quot;')}">
+      <span class="univ-filter-opt-icon">${sized}</span>
+      <span>${u.university}</span>
+    </div>`;
+}).join('');
 
     const html = `<!DOCTYPE html>
 <html lang="en">
@@ -150,7 +161,9 @@ export async function homePage(c: AppContext) {
       color: var(--color-text);
     }
 
-    .university-filter {
+    .univ-filter { position: relative; }
+
+.univ-filter-trigger {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -158,33 +171,64 @@ export async function homePage(c: AppContext) {
   border-radius: var(--radius-full);
   padding: 10px 18px;
   background: white;
-  min-width: 200px;
-  position: relative;
+  min-width: 220px;
   cursor: pointer;
+  user-select: none;
+  font-size: 14px;
 }
 
-.university-filter select {
-  border: none;
-  outline: none;
-  font-family: var(--font-sans);
-  font-size: 14px;
-  color: var(--color-text);
-  background: transparent;
-  cursor: pointer;
-  appearance: none;
+.univ-filter.open .univ-filter-trigger { border-color: var(--color-accent); }
+
+.univ-filter-icon {
+  width: 20px; height: 20px;
+  flex-shrink: 0;
+  display: flex; align-items: center;
+}
+
+.univ-filter-icon svg { width: 20px; height: 20px; display: block; }
+
+.univ-filter-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.univ-filter-chevron { flex-shrink: 0; transition: transform 0.15s; }
+.univ-filter.open .univ-filter-chevron { transform: rotate(180deg); }
+
+.univ-filter-options {
+  display: none;
   position: absolute;
-  top: 0; left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 100%;
+  background: white;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  z-index: 50;
+  max-height: 260px;
+  overflow-y: auto;
 }
 
-.university-filter .filter-label {
-  pointer-events: none;
-  font-size: 14px;
-  color: var(--color-text);
-  flex: 1;
+.univ-filter.open .univ-filter-options { display: block; }
+
+.univ-filter-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.1s;
 }
+
+.univ-filter-option:hover { background: var(--color-hover); }
+.univ-filter-option.selected { background: var(--color-primary-light); font-weight: 500; }
+
+.univ-filter-opt-icon {
+  width: 22px; height: 22px;
+  flex-shrink: 0;
+  display: flex; align-items: center;
+}
+
+.univ-filter-opt-icon svg { width: 22px; height: 22px; display: block; }
 
     .section-label {
       font-size: 13px;
@@ -255,14 +299,23 @@ export async function homePage(c: AppContext) {
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         <input type="text" name="search" placeholder="Search photographers..." value="${search}">
       </div>
-      <div class="university-filter">
-  <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
-  <span class="filter-label">${university || 'All universities'}</span>
-  <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-  <select name="university" onchange="this.form.submit()">
-    <option value="">All universities</option>
+      <div class="univ-filter" id="univ-filter">
+  <div class="univ-filter-trigger" onclick="toggleUnivFilter(event)">
+    <span class="univ-filter-icon">
+      ${currentFilterIcon ||
+        `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>`
+      }
+    </span>
+    <span class="univ-filter-label">${university || 'All universities'}</span>
+    <svg class="univ-filter-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
+      <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="univ-filter-options">
+    <div class="univ-filter-option${!university ? ' selected' : ''}" data-value="">All universities</div>
     ${universityOptions}
-  </select>
+  </div>
+  <input type="hidden" name="university" id="univ-filter-value" value="${university}">
 </div>
       <button type="submit" class="btn">Search</button>
     </div>
@@ -271,6 +324,24 @@ export async function homePage(c: AppContext) {
   <p class="section-label">${result.results.length} photographer${result.results.length !== 1 ? 's' : ''} found</p>
   <div class="grid">${cards}</div>
   </div>
+  <script>
+  function toggleUnivFilter(e) {
+    e.stopPropagation();
+    document.getElementById('univ-filter').classList.toggle('open');
+  }
+
+  document.querySelectorAll('.univ-filter-option').forEach(el => {
+    el.addEventListener('click', function(e) {
+      e.stopPropagation();
+      document.getElementById('univ-filter-value').value = this.dataset.value;
+      this.closest('form').submit();
+    });
+  });
+
+  document.addEventListener('click', () => {
+    document.getElementById('univ-filter').classList.remove('open');
+  });
+</script>
 </body>
 </html>`;
 
