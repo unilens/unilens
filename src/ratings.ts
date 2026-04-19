@@ -27,6 +27,11 @@ export async function ratePhotographer(c: AppContext) {
     return c.json({ error: 'You cannot rate yourself' }, 400);
   }
 
+  const interaction = await c.env.unilens_db.prepare(
+    `SELECT 1 FROM interactions WHERE photographer_id = ? AND client_id = ?`
+  ).bind(photographerId, user.id).first();
+  if (!interaction) return c.json({ error: 'You can only rate photographers you have worked with' }, 403);
+
   const id = crypto.randomUUID();
 
   await c.env.unilens_db.prepare(`

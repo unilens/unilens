@@ -8,6 +8,9 @@ import { homePage } from './home';
 import { loginPage, registerPage } from './pages';
 import { roleSelectPage } from './role';
 import { dashboardPage } from './dashboard';
+import { sendContactRequest, acceptContactRequest, declineContactRequest } from './contact';
+import { clientDashboardPage } from './client-dashboard';
+import { inquiriesPage } from './inquiries';
 import { sanitizePortfolio } from './sanitize';
 
 
@@ -18,6 +21,8 @@ app.get('/auth/login',    googleLogin);
 app.get('/auth/callback', googleCallback);
 app.post('/auth/complete', completeRegistration);
 app.get('/dashboard', requireAuth, dashboardPage);
+app.get('/dashboard/client', requireAuth, clientDashboardPage);
+app.get('/inquiries', requireAuth, inquiriesPage);
 app.get('/', softAuth, homePage);
 app.get('/p/:slug', softAuth, getProfile);
 app.get('/photographers', getPhotographers);
@@ -28,6 +33,9 @@ app.get('/register/role', roleSelectPage);
 app.post('/portfolio',  requireAuth, savePortfolio);
 app.post('/upload', requireAuth, uploadImage);
 app.post('/rate/:id', requireAuth, ratePhotographer);
+app.post('/contact/:id', requireAuth, sendContactRequest);
+app.post('/contact/:id/accept', requireAuth, acceptContactRequest);
+app.post('/contact/:id/decline', requireAuth, declineContactRequest);
 
 // Protected route example
 app.get('/me', requireAuth, c => {

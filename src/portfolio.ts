@@ -44,6 +44,11 @@ export async function getProfile(c: AppContext) {
   const user = c.get('user');
   const userRole = String(user?.role ?? '');
   const isLoggedIn = userRole !== '' && userRole !== ' ' && userRole !== undefined && userRole !== null;
+  const existingRequest = userRole === 'client'
+    ? await c.env.unilens_db.prepare(
+        `SELECT status FROM contact_requests WHERE client_id = ? AND photographer_id = (SELECT user_id FROM photographer_profiles WHERE slug = ?)`
+      ).bind(user?.id, slug).first<{ status: string }>()
+    : null;
   const profile = await c.env.unilens_db.prepare(`
     SELECT
       u.name,
@@ -56,7 +61,8 @@ export async function getProfile(c: AppContext) {
       p.avatar_url,
       p.university,
       ROUND(AVG(r.score), 1)  AS avg_rating,
-      COUNT(r.id)             AS review_count
+      COUNT(r.id)             AS review_count,
+      p.user_id
     FROM photographer_profiles p
     JOIN users u ON u.id = p.user_id
     LEFT JOIN ratings r ON r.photographer_id = p.user_id
@@ -302,6 +308,29 @@ ${profile.university ?? 'University not set'}
           ${priceHtml}
         </div>
         ${commissionBadge}
+        ${userRole === 'client' && profile.commission_open ? (() => {
+          if (existingRequest?.status === 'accepted') {
+            return `<div style="margin-top:10px;font-size:12px;color:#1a6e3c;font-weight:500;">✓ Request accepted — you can now rate this photographer</div>`;
+          }
+          if (existingRequest?.status === 'pending') {
+            return `<div style="margin-top:10px;font-size:12px;color:var(--color-text-muted);">⏳ Inquiry sent — waiting for response</div>`;
+          }
+          if (existingRequest?.status === 'declined') {
+            return `<div style="margin-top:10px;font-size:12px;color:#a32d2d;">Request declined</div>`;
+          }
+          return `
+            <div style="margin-top:12px;">
+              <textarea id="contact-msg" placeholder="Introduce yourself and describe your shoot…"
+                style="width:100%;padding:8px 10px;font-family:var(--font-sans);font-size:13px;
+                       border:1.5px solid var(--color-border);border-radius:var(--radius-sm);
+                       outline:none;resize:vertical;min-height:80px;margin-bottom:8px;"></textarea>
+              <button onclick="sendInquiry()"
+                style="padding:8px 20px;background:var(--color-primary);color:white;border:none;
+                       border-radius:var(--radius-full);font-family:var(--font-sans);font-size:13px;
+                       font-weight:500;cursor:pointer;">Send inquiry</button>
+              <p id="contact-msg-status" style="font-size:12px;margin-top:6px;min-height:16px;"></p>
+            </div>`;
+        })() : ''}
         <div class="stars">
           ${profile.review_count > 0
       ? stars(profile.avg_rating) + `<span class="rating-label">${profile.avg_rating} (${profile.review_count} review${profile.review_count !== 1 ? 's' : ''})</span>`
@@ -310,6 +339,26 @@ ${profile.university ?? 'University not set'}
         </div>
         <hr>
         ${bioHtml}
+        ${userRole === 'client' ? `
+        <hr>
+        <p class="section-label">Rate this photographer</p>
+        <div style="margin-top:8px;">
+          <div id="star-pick" style="display:flex;gap:6px;margin-bottom:10px;cursor:pointer;">
+            ${[1,2,3,4,5].map(i =>
+              `<span class="pick-star" onclick="setStar(${i})"
+                style="font-size:24px;color:var(--color-star-empty);transition:color 0.1s;">★</span>`
+            ).join('')}
+          </div>
+          <textarea id="review-text" placeholder="Leave a review (optional)…"
+            style="width:100%;padding:8px 10px;font-family:var(--font-sans);font-size:13px;
+                   border:1.5px solid var(--color-border);border-radius:var(--radius-sm);
+                   outline:none;resize:vertical;min-height:70px;margin-bottom:8px;"></textarea>
+          <button onclick="submitRating()"
+            style="padding:8px 20px;background:var(--color-accent);color:white;border:none;
+                   border-radius:var(--radius-full);font-family:var(--font-sans);font-size:13px;
+                   font-weight:500;cursor:pointer;">Submit rating</button>
+          <p id="rate-msg" style="font-size:12px;margin-top:8px;min-height:16px;"></p>
+        </div>` : ''}
       </aside>
 
       <main>
@@ -319,6 +368,49 @@ ${profile.university ?? 'University not set'}
 
     </div>
   </div>
+${userRole === 'client' ? `
+  <script>
+    (function(){
+      let chosen = 0;
+      function setStar(v) {
+        chosen = v;
+        document.querySelectorAll('.pick-star').forEach((s,i) => {
+          s.style.color = i < v ? 'var(--color-star)' : 'var(--color-star-empty)';
+        });
+      }
+      async function submitRating() {
+        const msg = document.getElementById('rate-msg');
+        if (!chosen) { msg.textContent = 'Select a star rating first.'; return; }
+        const res = await fetch('/rate/${profile.user_id}', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ score: chosen, review: document.getElementById('review-text').value || null })
+        });
+        const d = await res.json();
+        msg.style.color = res.ok ? '#1a6e3c' : '#a32d2d';
+        msg.textContent = res.ok ? '✓ Rating submitted!' : (d.error ?? 'Error submitting rating');
+      }
+      window.setStar = setStar;
+      window.submitRating = submitRating;
+      
+      async function sendInquiry() {
+        const status = document.getElementById('contact-msg-status');
+        const res = await fetch('/contact/${profile.user_id}', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ message: document.getElementById('contact-msg').value || null })
+        });
+        const d = await res.json();
+        status.style.color = res.ok ? '#1a6e3c' : '#a32d2d';
+        status.textContent = res.ok ? '✓ Inquiry sent!' : (d.error ?? 'Error sending inquiry');
+        if (res.ok) {
+          document.getElementById('contact-msg').disabled = true;
+          document.querySelector('[onclick="sendInquiry()"]').disabled = true;
+        }
+      }
+      window.sendInquiry = sendInquiry;
+    })();
+  </script>` : ''}
 </body>
 </html>`;
 
@@ -340,7 +432,8 @@ export async function getPhotographers(c: AppContext) {
       p.commission_open,
       p.avatar_url,
       ROUND(AVG(r.score), 1) AS avg_rating,
-      COUNT(r.id)            AS review_count
+      COUNT(r.id)             AS review_count,
+      p.user_id
     FROM photographer_profiles p
     JOIN users u ON u.id = p.user_id
     LEFT JOIN ratings r ON r.photographer_id = p.user_id

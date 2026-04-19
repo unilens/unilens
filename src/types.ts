@@ -24,4 +24,5 @@ export interface PhotographerProfile {
   university:      string;
   avg_rating:      number;
   review_count:    number;
+  user_id:         string;
 }

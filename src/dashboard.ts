@@ -9,7 +9,7 @@ export async function dashboardPage(c: AppContext) {
   const user = c.get('user');
 
   if (user.role !== 'photographer') {
-    return c.redirect('/');
+    return c.redirect('/dashboard/client');
   }
 
   const profile = await c.env.unilens_db.prepare(`
