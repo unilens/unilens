@@ -739,9 +739,9 @@ export async function dashboardPage(c: AppContext) {
     function buildGridHtml(images) {
       if (!images.length) return '<p style="font-family:sans-serif;color:#aaa;padding:40px;text-align:center;">No images yet.</p>';
       var imgs = images.map(function(url) {
-        return '<img src="' + url + '" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px;">';
+        return '<img src="' + url + '" style="width:100%;display:block;margin-bottom:2px;">';
       }).join('');
-      return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px;">' + imgs + '</div>';
+      return '<div style="column-count:2;column-gap:2px;background:#2e2e2e;padding:0;margin:0;">' + imgs + '</div>';
     }
 
     function renderGridThumbs() {
