@@ -690,13 +690,12 @@ export async function dashboardPage(c: AppContext) {
   <div class="toast" id="toast"></div>
 
   <script>
-    let commissionOn = ${profile?.commission_open ? 'true' : 'false'};
-    let undoStack = [];
-    let avatarUrl = '${profile?.avatar_url ?? ''}';
-    let currentLayout = '${layoutMode}';
-    let gridImages = ${JSON.stringify(gridImages)};
+    var commissionOn = ${profile?.commission_open ? 'true' : 'false'};
+    var undoStack = [];
+    var avatarUrl = '${profile?.avatar_url ?? ''}';
+    var currentLayout = '${layoutMode}';
+    var gridImages = ${JSON.stringify(gridImages)};
 
-    // ── University dropdown ──
     function toggleUnivDropdown(e) {
       e.stopPropagation();
       document.getElementById('univ-select').classList.toggle('open');
@@ -704,12 +703,11 @@ export async function dashboardPage(c: AppContext) {
 
     function selectUniversity(name, iconHtml) {
       document.getElementById('university').value = name;
-      const triggerIcon  = document.getElementById('univ-trigger-icon');
-      const triggerLabel = document.getElementById('univ-trigger-label');
-      triggerIcon.innerHTML = iconHtml;
-      triggerLabel.textContent = name;
-      triggerLabel.classList.remove('placeholder');
-      document.querySelectorAll('.univ-option').forEach(el => {
+      document.getElementById('univ-trigger-icon').innerHTML = iconHtml;
+      var lbl = document.getElementById('univ-trigger-label');
+      lbl.textContent = name;
+      lbl.classList.remove('placeholder');
+      document.querySelectorAll('.univ-option').forEach(function(el) {
         el.classList.toggle('selected', el.dataset.name === name);
       });
       document.getElementById('univ-select').classList.remove('open');
@@ -718,19 +716,17 @@ export async function dashboardPage(c: AppContext) {
         iconHtml.replace('<svg ', '<svg width="18" height="18" ');
     }
 
-    document.querySelectorAll('.univ-option').forEach(el => {
+    document.querySelectorAll('.univ-option').forEach(function(el) {
       el.addEventListener('click', function(e) {
         e.stopPropagation();
         selectUniversity(this.dataset.name, this.querySelector('.univ-opt-icon').innerHTML);
       });
     });
 
-    document.addEventListener('click', () => {
+    document.addEventListener('click', function() {
       document.getElementById('univ-select').classList.remove('open');
     });
-    // ── end university dropdown ──
 
-    // ── Layout toggle ──
     function setLayout(mode) {
       currentLayout = mode;
       document.getElementById('btn-simple').classList.toggle('active', mode === 'simple');
@@ -742,14 +738,14 @@ export async function dashboardPage(c: AppContext) {
 
     function buildGridHtml(images) {
       if (!images.length) return '<p style="font-family:sans-serif;color:#aaa;padding:40px;text-align:center;">No images yet.</p>';
-      const imgs = images.map(function(url) {
+      var imgs = images.map(function(url) {
         return '<img src="' + url + '" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px;">';
       }).join('');
       return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px;">' + imgs + '</div>';
     }
 
     function renderGridThumbs() {
-      const container = document.getElementById('grid-thumbs');
+      var container = document.getElementById('grid-thumbs');
       if (!gridImages.length) {
         container.innerHTML = '<p class="grid-empty">No images yet \u2014 upload some above.</p>';
         return;
@@ -757,46 +753,45 @@ export async function dashboardPage(c: AppContext) {
       container.innerHTML = gridImages.map(function(url, i) {
         return '<div class="grid-thumb" id="thumb-' + i + '">' +
           '<img src="' + url + '" alt="">' +
-          '<button class="thumb-remove" onclick="removeGridImage(\'' + url + '\')">&times;</button>' +
+          '<button class="thumb-remove" onclick="removeGridImage(' + i + ')">&times;</button>' +
           '</div>';
       }).join('');
     }
 
-    function removeGridImage(url) {
-      gridImages = gridImages.filter(u => u !== url);
+    function removeGridImage(index) {
+      gridImages.splice(index, 1);
       renderGridThumbs();
       updatePreview();
     }
-    // ── end layout toggle ──
 
     function toggleCommission() {
       commissionOn = !commissionOn;
-      const btn = document.getElementById('commission-toggle');
-      const label = document.getElementById('commission-label');
-      const badge = document.getElementById('preview-commission');
-      btn.classList.toggle('on', commissionOn);
-      label.textContent = commissionOn ? 'Open for Commission' : 'Not Available';
+      document.getElementById('commission-toggle').classList.toggle('on', commissionOn);
+      document.getElementById('commission-label').textContent = commissionOn ? 'Open for Commission' : 'Not Available';
+      var badge = document.getElementById('preview-commission');
       badge.textContent = commissionOn ? 'Open for Commission' : 'Not Available';
       badge.classList.toggle('closed', !commissionOn);
     }
 
     function updatePreview() {
-      const html = currentLayout === 'simple'
+      var html = currentLayout === 'simple'
         ? buildGridHtml(gridImages)
         : document.getElementById('portfolio-html').value;
       document.getElementById('preview-frame').srcdoc = html;
-
       document.getElementById('preview-university').textContent =
         document.getElementById('university').value || 'University not set';
-
-      const min = document.getElementById('price-min').value;
-      const max = document.getElementById('price-max').value;
-      document.getElementById('preview-price').textContent =
-        '$' + (min || '?') + ' – $' + (max || '?');
+      var min = document.getElementById('price-min').value;
+      var max = document.getElementById('price-max').value;
+      document.getElementById('preview-price').textContent = '$' + (min || '?') + ' \u2013 $' + (max || '?');
     }
 
     document.getElementById('price-min').addEventListener('input', updatePreview);
     document.getElementById('price-max').addEventListener('input', updatePreview);
+    document.getElementById('portfolio-html').addEventListener('input', function() {
+      undoStack.push(this.value);
+      if (undoStack.length > 50) undoStack.shift();
+      updatePreview();
+    });
 
     function handleUndo(e) {
       if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
@@ -806,39 +801,33 @@ export async function dashboardPage(c: AppContext) {
     }
 
     function undo() {
-      const ta = document.getElementById('portfolio-html');
       if (undoStack.length > 0) {
-        ta.value = undoStack.pop();
+        document.getElementById('portfolio-html').value = undoStack.pop();
         updatePreview();
       }
     }
 
-    document.getElementById('portfolio-html').addEventListener('input', function() {
-      undoStack.push(this.value);
-      if (undoStack.length > 50) undoStack.shift();
-    });
-
     function showToast(msg) {
-      const t = document.getElementById('toast');
+      var t = document.getElementById('toast');
       t.textContent = msg;
       t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 2500);
+      setTimeout(function() { t.classList.remove('show'); }, 2500);
     }
 
     async function uploadAvatar(input) {
-      const file = input.files[0];
+      var file = input.files[0];
       if (!file) return;
-      const fd = new FormData();
+      var fd = new FormData();
       fd.append('image', file);
-      const res = await fetch('/upload', { method: 'POST', body: fd });
-      const data = await res.json();
+      var res = await fetch('/upload', { method: 'POST', body: fd });
+      var data = await res.json();
       if (res.ok) {
         avatarUrl = data.url;
-        const img = document.getElementById('avatar-preview');
+        var img = document.getElementById('avatar-preview');
         img.src = avatarUrl;
         img.style.display = 'block';
         document.getElementById('avatar-placeholder').style.display = 'none';
-        const previewImg = document.getElementById('preview-avatar-img');
+        var previewImg = document.getElementById('preview-avatar-img');
         previewImg.src = avatarUrl;
         previewImg.style.display = 'block';
         document.getElementById('preview-avatar-placeholder').style.display = 'none';
@@ -849,12 +838,12 @@ export async function dashboardPage(c: AppContext) {
     }
 
     async function uploadImage(input) {
-      const file = input.files[0];
+      var file = input.files[0];
       if (!file) return;
-      const fd = new FormData();
+      var fd = new FormData();
       fd.append('image', file);
-      const res = await fetch('/upload', { method: 'POST', body: fd });
-      const data = await res.json();
+      var res = await fetch('/upload', { method: 'POST', body: fd });
+      var data = await res.json();
       if (res.ok) {
         if (currentLayout === 'simple') {
           gridImages.push(data.url);
@@ -862,11 +851,11 @@ export async function dashboardPage(c: AppContext) {
           updatePreview();
           showToast('Image added to grid!');
         } else {
-          const container = document.getElementById('uploaded-urls');
-          const link = document.createElement('a');
+          var container = document.getElementById('uploaded-urls');
+          var link = document.createElement('a');
           link.textContent = data.url;
           link.title = 'Click to copy';
-          link.onclick = () => {
+          link.onclick = function() {
             navigator.clipboard.writeText('<img src="' + data.url + '" alt="">');
             showToast('Copied img tag to clipboard!');
           };
@@ -879,15 +868,15 @@ export async function dashboardPage(c: AppContext) {
     }
 
     async function saveProfile() {
-      const btn = document.getElementById('save-btn');
+      var btn = document.getElementById('save-btn');
       btn.disabled = true;
       btn.textContent = 'Saving...';
 
-      const portfolioHtml = currentLayout === 'simple'
+      var portfolioHtml = currentLayout === 'simple'
         ? buildGridHtml(gridImages)
         : document.getElementById('portfolio-html').value;
 
-      const body = {
+      var body = {
         slug:            document.getElementById('slug').value,
         bio:             document.getElementById('bio').value,
         university:      document.getElementById('university').value,
@@ -900,21 +889,16 @@ export async function dashboardPage(c: AppContext) {
         grid_images:     JSON.stringify(gridImages),
       };
 
-      const res = await fetch('/portfolio', {
+      var res = await fetch('/portfolio', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
 
-      const data = await res.json();
+      var data = await res.json();
       btn.disabled = false;
       btn.textContent = 'Save';
-
-      if (res.ok) {
-        showToast('Profile saved!');
-      } else {
-        showToast('Error: ' + (data.error ?? 'Save failed'));
-      }
+      showToast(res.ok ? 'Profile saved!' : 'Error: ' + (data.error || 'Save failed'));
     }
   </script>
 </body>
