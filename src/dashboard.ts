@@ -18,12 +18,20 @@ export async function dashboardPage(c: AppContext) {
     bio: string; portfolio_html: string; slug: string;
     price_min: number; price_max: number; commission_open: number;
     avatar_url: string; university: string;
+    layout_mode: string; grid_images: string;
   }>();
 
   // Resolve the currently-selected university for server-side render
   const currentUniv  = universities.find(u => u.name === profile?.university);
   const currentIcon  = currentUniv?.svg ?? '';
   const currentLabel = profile?.university ?? 'Select university...';
+  const layoutMode = profile?.layout_mode ?? 'simple';
+  const gridImages: string[] = JSON.parse(profile?.grid_images ?? '[]');
+  const gridThumbsHtml = gridImages.map((url, i) => `
+    <div class="grid-thumb" id="thumb-${i}">
+      <img src="${url}" alt="">
+      <button class="thumb-remove" onclick="removeGridImage('${url}')">&times;</button>
+    </div>`).join('');
 
   // Build the dropdown option list
   const univOptions = universities.map(u => {
@@ -472,6 +480,61 @@ export async function dashboardPage(c: AppContext) {
       border: none;
       display: block;
     }
+
+    /* ── Layout toggle ── */
+    .layout-toggle {
+      display: flex;
+      gap: 0;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      margin-bottom: 12px;
+      width: fit-content;
+    }
+    .layout-btn {
+      padding: 7px 16px;
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 500;
+      border: none;
+      background: white;
+      cursor: pointer;
+      color: var(--color-text-muted);
+      transition: background 0.15s, color 0.15s;
+    }
+    .layout-btn:first-child { border-right: 1.5px solid var(--color-border); }
+    .layout-btn.active { background: var(--color-primary); color: white; }
+
+    /* ── Simple grid thumbs ── */
+    .grid-thumbs {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+      min-height: 40px;
+    }
+    .grid-thumb {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1.5px solid var(--color-border);
+    }
+    .grid-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .thumb-remove {
+      position: absolute; top: 3px; right: 3px;
+      width: 18px; height: 18px;
+      background: rgba(0,0,0,0.6); color: white;
+      border: none; border-radius: 50%;
+      font-size: 12px; line-height: 1;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      padding: 0;
+    }
+    .grid-empty {
+      font-size: 12px;
+      color: var(--color-text-muted);
+      padding: 12px 0;
+    }
   </style>
 </head>
 <body>
@@ -552,8 +615,24 @@ export async function dashboardPage(c: AppContext) {
       </div>
 
       <div class="form-group">
-        <label>Portfolio HTML</label>
-        <textarea class="html-zone" id="portfolio-html" oninput="updatePreview()" onkeydown="handleUndo(event)">${profile?.portfolio_html ?? ''}</textarea>
+        <label>Portfolio layout</label>
+        <div class="layout-toggle">
+          <button class="layout-btn${layoutMode === 'simple' ? ' active' : ''}" id="btn-simple" onclick="setLayout('simple')">Simple Grid</button>
+          <button class="layout-btn${layoutMode === 'custom' ? ' active' : ''}" id="btn-custom" onclick="setLayout('custom')">Custom HTML</button>
+        </div>
+
+        <!-- Simple grid panel -->
+        <div id="panel-simple" style="display:${layoutMode === 'simple' ? 'block' : 'none'};">
+          <div class="grid-thumbs" id="grid-thumbs">
+            ${gridThumbsHtml || '<p class="grid-empty">No images yet — upload some above.</p>'}
+          </div>
+          <p style="font-size:11px;color:var(--color-text-muted);">Uploaded images appear here in a 2-column grid. Use the upload button above.</p>
+        </div>
+
+        <!-- Custom HTML panel -->
+        <div id="panel-custom" style="display:${layoutMode === 'custom' ? 'block' : 'none'};">
+          <textarea class="html-zone" id="portfolio-html" oninput="updatePreview()" onkeydown="handleUndo(event)">${profile?.portfolio_html ?? ''}</textarea>
+        </div>
       </div>
 
       <div class="bottom-bar">
@@ -614,6 +693,8 @@ export async function dashboardPage(c: AppContext) {
     let commissionOn = ${profile?.commission_open ? 'true' : 'false'};
     let undoStack = [];
     let avatarUrl = '${profile?.avatar_url ?? ''}';
+    let currentLayout = '${layoutMode}';
+    let gridImages = ${JSON.stringify(gridImages)};
 
     // ── University dropdown ──
     function toggleUnivDropdown(e) {
@@ -622,43 +703,71 @@ export async function dashboardPage(c: AppContext) {
     }
 
     function selectUniversity(name, iconHtml) {
-      // Update hidden input (read by saveProfile)
       document.getElementById('university').value = name;
-
-      // Update trigger display
       const triggerIcon  = document.getElementById('univ-trigger-icon');
       const triggerLabel = document.getElementById('univ-trigger-label');
       triggerIcon.innerHTML = iconHtml;
       triggerLabel.textContent = name;
       triggerLabel.classList.remove('placeholder');
-
-      // Mark selected option
       document.querySelectorAll('.univ-option').forEach(el => {
         el.classList.toggle('selected', el.dataset.name === name);
       });
-
       document.getElementById('univ-select').classList.remove('open');
       updatePreview();
       document.getElementById('preview-university-icon').innerHTML =
-  iconHtml.replace('<svg ', '<svg width="18" height="18" ');
+        iconHtml.replace('<svg ', '<svg width="18" height="18" ');
     }
 
-    // Wire up option clicks (avoids inline onclick + escaping issues)
     document.querySelectorAll('.univ-option').forEach(el => {
       el.addEventListener('click', function(e) {
         e.stopPropagation();
-        selectUniversity(
-          this.dataset.name,
-          this.querySelector('.univ-opt-icon').innerHTML
-        );
+        selectUniversity(this.dataset.name, this.querySelector('.univ-opt-icon').innerHTML);
       });
     });
 
-    // Close dropdown when clicking outside
     document.addEventListener('click', () => {
       document.getElementById('univ-select').classList.remove('open');
     });
     // ── end university dropdown ──
+
+    // ── Layout toggle ──
+    function setLayout(mode) {
+      currentLayout = mode;
+      document.getElementById('btn-simple').classList.toggle('active', mode === 'simple');
+      document.getElementById('btn-custom').classList.toggle('active', mode === 'custom');
+      document.getElementById('panel-simple').style.display = mode === 'simple' ? 'block' : 'none';
+      document.getElementById('panel-custom').style.display = mode === 'custom' ? 'block' : 'none';
+      updatePreview();
+    }
+
+    function buildGridHtml(images) {
+      if (!images.length) return '<p style="font-family:sans-serif;color:#aaa;padding:40px;text-align:center;">No images yet.</p>';
+      const imgs = images.map(function(url) {
+        return '<img src="' + url + '" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px;">';
+      }).join('');
+      return '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px;">' + imgs + '</div>';
+    }
+
+    function renderGridThumbs() {
+      const container = document.getElementById('grid-thumbs');
+      if (!gridImages.length) {
+        container.innerHTML = '<p class="grid-empty">No images yet \u2014 upload some above.</p>';
+        return;
+      }
+      container.innerHTML = gridImages.map(function(url, i) {
+        return '<div class="grid-thumb" id="thumb-' + i + '">' +
+          '<img src="' + url + '" alt="">' +
+          '<button class="thumb-remove" onclick="removeGridImage(\'' + url + '\')">&times;</button>' +
+          '</div>';
+      }).join('');
+    }
+
+    function removeGridImage(url) {
+      gridImages = gridImages.filter(u => u !== url);
+      renderGridThumbs();
+      updatePreview();
+    }
+    // ── end layout toggle ──
 
     function toggleCommission() {
       commissionOn = !commissionOn;
@@ -672,9 +781,10 @@ export async function dashboardPage(c: AppContext) {
     }
 
     function updatePreview() {
-      const html = document.getElementById('portfolio-html').value;
-      const frame = document.getElementById('preview-frame');
-      frame.srcdoc = html;
+      const html = currentLayout === 'simple'
+        ? buildGridHtml(gridImages)
+        : document.getElementById('portfolio-html').value;
+      document.getElementById('preview-frame').srcdoc = html;
 
       document.getElementById('preview-university').textContent =
         document.getElementById('university').value || 'University not set';
@@ -718,25 +828,20 @@ export async function dashboardPage(c: AppContext) {
     async function uploadAvatar(input) {
       const file = input.files[0];
       if (!file) return;
-
       const fd = new FormData();
       fd.append('image', file);
-
       const res = await fetch('/upload', { method: 'POST', body: fd });
       const data = await res.json();
-
       if (res.ok) {
         avatarUrl = data.url;
         const img = document.getElementById('avatar-preview');
         img.src = avatarUrl;
         img.style.display = 'block';
         document.getElementById('avatar-placeholder').style.display = 'none';
-
         const previewImg = document.getElementById('preview-avatar-img');
         previewImg.src = avatarUrl;
         previewImg.style.display = 'block';
         document.getElementById('preview-avatar-placeholder').style.display = 'none';
-
         showToast('Avatar uploaded!');
       } else {
         showToast('Upload failed: ' + data.error);
@@ -746,24 +851,28 @@ export async function dashboardPage(c: AppContext) {
     async function uploadImage(input) {
       const file = input.files[0];
       if (!file) return;
-
       const fd = new FormData();
       fd.append('image', file);
-
       const res = await fetch('/upload', { method: 'POST', body: fd });
       const data = await res.json();
-
       if (res.ok) {
-        const container = document.getElementById('uploaded-urls');
-        const link = document.createElement('a');
-        link.textContent = data.url;
-        link.title = 'Click to copy';
-        link.onclick = () => {
-          navigator.clipboard.writeText('<img src="' + data.url + '" alt="">');
-          showToast('Copied img tag to clipboard!');
-        };
-        container.prepend(link);
-        showToast('Image uploaded! Click URL to copy img tag.');
+        if (currentLayout === 'simple') {
+          gridImages.push(data.url);
+          renderGridThumbs();
+          updatePreview();
+          showToast('Image added to grid!');
+        } else {
+          const container = document.getElementById('uploaded-urls');
+          const link = document.createElement('a');
+          link.textContent = data.url;
+          link.title = 'Click to copy';
+          link.onclick = () => {
+            navigator.clipboard.writeText('<img src="' + data.url + '" alt="">');
+            showToast('Copied img tag to clipboard!');
+          };
+          container.prepend(link);
+          showToast('Image uploaded! Click URL to copy img tag.');
+        }
       } else {
         showToast('Upload failed: ' + data.error);
       }
@@ -774,6 +883,10 @@ export async function dashboardPage(c: AppContext) {
       btn.disabled = true;
       btn.textContent = 'Saving...';
 
+      const portfolioHtml = currentLayout === 'simple'
+        ? buildGridHtml(gridImages)
+        : document.getElementById('portfolio-html').value;
+
       const body = {
         slug:            document.getElementById('slug').value,
         bio:             document.getElementById('bio').value,
@@ -782,7 +895,9 @@ export async function dashboardPage(c: AppContext) {
         price_max:       parseInt(document.getElementById('price-max').value) || null,
         commission_open: commissionOn ? 1 : 0,
         avatar_url:      avatarUrl || null,
-        portfolio_html:  document.getElementById('portfolio-html').value,
+        portfolio_html:  portfolioHtml,
+        layout_mode:     currentLayout,
+        grid_images:     JSON.stringify(gridImages),
       };
 
       const res = await fetch('/portfolio', {

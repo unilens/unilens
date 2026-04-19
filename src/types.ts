@@ -25,4 +25,6 @@ export interface PhotographerProfile {
   avg_rating:      number;
   review_count:    number;
   user_id:         string;
+  layout_mode:     string;
+  grid_images:     string;
 }

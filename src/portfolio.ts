@@ -14,7 +14,7 @@ export async function savePortfolio(c: AppContext) {
     return c.json({ error: 'Only photographers can save a portfolio' }, 403);
   }
 
-  const { bio, portfolio_html, slug, price_min, price_max, commission_open, avatar_url, university } = await c.req.json();
+  const { bio, portfolio_html, slug, price_min, price_max, commission_open, avatar_url, university, layout_mode, grid_images } = await c.req.json();
 
   if (!slug || !/^[a-z0-9-]+$/.test(slug)) {
     return c.json({ error: 'Slug must be lowercase letters, numbers, and hyphens only' }, 400);
@@ -23,18 +23,20 @@ export async function savePortfolio(c: AppContext) {
   const sanitized = sanitizePortfolio(portfolio_html ?? '');
 
   await c.env.unilens_db.prepare(`
-  INSERT INTO photographer_profiles (user_id, bio, portfolio_html, slug, price_min, price_max, commission_open, avatar_url, university)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  INSERT INTO photographer_profiles (user_id, bio, portfolio_html, slug, price_min, price_max, commission_open, avatar_url, university, layout_mode, grid_images)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   ON CONFLICT(user_id) DO UPDATE SET
-    bio            = excluded.bio,
-    portfolio_html = excluded.portfolio_html,
-    slug           = excluded.slug,
-    price_min      = excluded.price_min,
-    price_max      = excluded.price_max,
+    bio             = excluded.bio,
+    portfolio_html  = excluded.portfolio_html,
+    slug            = excluded.slug,
+    price_min       = excluded.price_min,
+    price_max       = excluded.price_max,
     commission_open = excluded.commission_open,
-    avatar_url     = excluded.avatar_url,
-    university     = excluded.university
-`).bind(user.id, bio ?? '', sanitized, slug, price_min ?? null, price_max ?? null, commission_open ?? 1, avatar_url ?? null, university ?? null).run();
+    avatar_url      = excluded.avatar_url,
+    university      = excluded.university,
+    layout_mode     = excluded.layout_mode,
+    grid_images     = excluded.grid_images
+`).bind(user.id, bio ?? '', sanitized, slug, price_min ?? null, price_max ?? null, commission_open ?? 1, avatar_url ?? null, university ?? null, layout_mode ?? 'simple', grid_images ?? '[]').run();
 
   return c.json({ success: true, slug });
 }
@@ -392,7 +394,7 @@ ${userRole === 'client' ? `
       }
       window.setStar = setStar;
       window.submitRating = submitRating;
-      
+
       async function sendInquiry() {
         const status = document.getElementById('contact-msg-status');
         const res = await fetch('/contact/${profile.user_id}', {
