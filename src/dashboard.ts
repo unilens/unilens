@@ -63,6 +63,13 @@ export async function dashboardPage(c: AppContext) {
       grid-template-columns: 1fr 1px 1fr;
       min-height: calc(100vh - 65px);
     }
+      @media (max-width: 768px) {
+  .dashboard { grid-template-columns: 1fr; }
+  .divider { display: none; }
+}
+  @media (max-width: 480px) {
+  .fields-grid { grid-template-columns: 1fr; }
+}
 
     .divider { background: var(--color-border); }
 

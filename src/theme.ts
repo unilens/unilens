@@ -36,7 +36,12 @@ export const theme = `
   a { color: inherit; text-decoration: none; }
 `;
 export const topbarStyles = `
-  .topbar {
+@media (max-width: 640px) {
+  .topbar { padding: 0.75rem 1rem; flex-wrap: wrap; gap: 0.5rem; }
+  .nav-links { gap: 0.75rem; font-size: 13px; flex-wrap: wrap; }
+  .logo-title { font-size: 18px; }
+}  
+.topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;

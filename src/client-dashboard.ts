@@ -180,6 +180,9 @@ export async function clientDashboardPage(c: AppContext) {
       gap: 1.25rem;
       margin-bottom: 3rem;
     }
+      @media (max-width: 480px) {
+  .sug-grid { grid-template-columns: repeat(2, 1fr); }
+}
 
     .sug-card {
       display: flex; flex-direction: column; align-items: center;

@@ -48,8 +48,8 @@ export async function getProfile(c: AppContext) {
   const isLoggedIn = userRole !== '' && userRole !== ' ' && userRole !== undefined && userRole !== null;
   const existingRequest = userRole === 'client'
     ? await c.env.unilens_db.prepare(
-        `SELECT status FROM contact_requests WHERE client_id = ? AND photographer_id = (SELECT user_id FROM photographer_profiles WHERE slug = ?)`
-      ).bind(user?.id, slug).first<{ status: string }>()
+      `SELECT status FROM contact_requests WHERE client_id = ? AND photographer_id = (SELECT user_id FROM photographer_profiles WHERE slug = ?)`
+    ).bind(user?.id, slug).first<{ status: string }>()
     : null;
   const profile = await c.env.unilens_db.prepare(`
     SELECT
@@ -157,8 +157,16 @@ export async function getProfile(c: AppContext) {
       gap: 2.5rem;
       align-items: start;
     }
+      @media (max-width: 700px) {
+  .profile-layout { grid-template-columns: 1fr; }
+  .sidebar { position: static; }
+  .page-content { width: 95%; padding: 1rem 0 3rem; }
+}
 
     .sidebar { position: sticky; top: 2rem; }
+@media (max-width: 700px) {
+  .sidebar { position: static; }
+}
 
     .avatar {
       width: 110px; height: 110px;
@@ -300,9 +308,9 @@ export async function getProfile(c: AppContext) {
         <h1 class="photographer-name">${profile.name}</h1>
         <div class="meta-row">
           ${profile.university && getUniversitySvg(profile.university)
-  ? `<span style="width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;">${getUniversitySvg(profile.university).replace('<svg ', '<svg width="20" height="20" ')}</span>`
-  : `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>`
-}
+      ? `<span style="width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;">${getUniversitySvg(profile.university).replace('<svg ', '<svg width="20" height="20" ')}</span>`
+      : `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>`
+    }
 ${profile.university ?? 'University not set'}
         </div>
         <div class="meta-row">
@@ -311,16 +319,16 @@ ${profile.university ?? 'University not set'}
         </div>
         ${commissionBadge}
         ${userRole === 'client' && profile.commission_open ? (() => {
-          if (existingRequest?.status === 'accepted') {
-            return `<div style="margin-top:10px;font-size:12px;color:#1a6e3c;font-weight:500;">✓ Request accepted — you can now rate this photographer</div>`;
-          }
-          if (existingRequest?.status === 'pending') {
-            return `<div style="margin-top:10px;font-size:12px;color:var(--color-text-muted);">⏳ Inquiry sent — waiting for response</div>`;
-          }
-          if (existingRequest?.status === 'declined') {
-            return `<div style="margin-top:10px;font-size:12px;color:#a32d2d;">Request declined</div>`;
-          }
-          return `
+      if (existingRequest?.status === 'accepted') {
+        return `<div style="margin-top:10px;font-size:12px;color:#1a6e3c;font-weight:500;">✓ Request accepted — you can now rate this photographer</div>`;
+      }
+      if (existingRequest?.status === 'pending') {
+        return `<div style="margin-top:10px;font-size:12px;color:var(--color-text-muted);">⏳ Inquiry sent — waiting for response</div>`;
+      }
+      if (existingRequest?.status === 'declined') {
+        return `<div style="margin-top:10px;font-size:12px;color:#a32d2d;">Request declined</div>`;
+      }
+      return `
             <div style="margin-top:12px;">
               <textarea id="contact-msg" placeholder="Introduce yourself and describe your shoot…"
                 style="width:100%;padding:8px 10px;font-family:var(--font-sans);font-size:13px;
@@ -332,7 +340,7 @@ ${profile.university ?? 'University not set'}
                        font-weight:500;cursor:pointer;">Send inquiry</button>
               <p id="contact-msg-status" style="font-size:12px;margin-top:6px;min-height:16px;"></p>
             </div>`;
-        })() : ''}
+    })() : ''}
         <div class="stars">
           ${profile.review_count > 0
       ? stars(profile.avg_rating) + `<span class="rating-label">${profile.avg_rating} (${profile.review_count} review${profile.review_count !== 1 ? 's' : ''})</span>`
@@ -346,10 +354,10 @@ ${profile.university ?? 'University not set'}
         <p class="section-label">Rate this photographer</p>
         <div style="margin-top:8px;">
           <div id="star-pick" style="display:flex;gap:6px;margin-bottom:10px;cursor:pointer;">
-            ${[1,2,3,4,5].map(i =>
-              `<span class="pick-star" onclick="setStar(${i})"
+            ${[1, 2, 3, 4, 5].map(i =>
+      `<span class="pick-star" onclick="setStar(${i})"
                 style="font-size:24px;color:var(--color-star-empty);transition:color 0.1s;">★</span>`
-            ).join('')}
+    ).join('')}
           </div>
           <textarea id="review-text" placeholder="Leave a review (optional)…"
             style="width:100%;padding:8px 10px;font-family:var(--font-sans);font-size:13px;

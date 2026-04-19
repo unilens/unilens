@@ -7,31 +7,31 @@ import { getUniversitySvg } from './universities';
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
 
 interface Photographer {
-    name: string;
-    slug: string;
-    bio: string;
-    university: string;
-    price_min: number | null;
-    price_max: number | null;
-    commission_open: number;
-    avatar_url: string | null;
-    avg_rating: number | null;
-    review_count: number;
+  name: string;
+  slug: string;
+  bio: string;
+  university: string;
+  price_min: number | null;
+  price_max: number | null;
+  commission_open: number;
+  avatar_url: string | null;
+  avg_rating: number | null;
+  review_count: number;
 }
 
 function stars(avg: number | null): string {
-    if (!avg) return '<span style="font-size:11px;color:var(--color-text-muted);">No reviews</span>';
-    const filled = Math.round(avg);
-    return Array.from({ length: 5 }, (_, i) =>
-        `<span style="color:${i < filled ? 'var(--color-star)' : 'var(--color-star-empty)'}; font-size:14px;">★</span>`
-    ).join('');
+  if (!avg) return '<span style="font-size:11px;color:var(--color-text-muted);">No reviews</span>';
+  const filled = Math.round(avg);
+  return Array.from({ length: 5 }, (_, i) =>
+    `<span style="color:${i < filled ? 'var(--color-star)' : 'var(--color-star-empty)'}; font-size:14px;">★</span>`
+  ).join('');
 }
 
 function avatar(p: Photographer): string {
-    if (p.avatar_url) {
-        return `<img src="${p.avatar_url}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;">`;
-    }
-    return `<svg viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:60%;height:60%;">
+  if (p.avatar_url) {
+    return `<img src="${p.avatar_url}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;">`;
+  }
+  return `<svg viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:60%;height:60%;">
     <circle cx="27" cy="20" r="10" fill="var(--color-primary)" opacity="0.8"/>
     <ellipse cx="27" cy="44" rx="16" ry="10" fill="var(--color-primary)" opacity="0.8"/>
   </svg>`;
@@ -46,18 +46,17 @@ function photographerCard(p: Photographer, userRole?: string): string {
         <div class="card-meta">
           <div class="meta-row">
             ${p.university && getUniversitySvg(p.university)
-  ? `<span style="width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;">${getUniversitySvg(p.university).replace('<svg ', '<svg width="18" height="18" ')}</span>`
-  : `<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>`
-}
+      ? `<span style="width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;">${getUniversitySvg(p.university).replace('<svg ', '<svg width="18" height="18" ')}</span>`
+      : `<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>`
+    }
 <span>${p.university ?? '—'}</span>
           </div>
           <div class="meta-row">
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 4.5h10M3 8h6M5 11.5L8 13l3-1.5V3.5a1 1 0 00-1-1H6a1 1 0 00-1 1v8z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            ${
-        isLoggedIn
-          ? `<span>$${p.price_min ?? '?'} - $${p.price_max ?? '?'}</span>`
-          : `<span class="muted">Log in to view prices</span>`
-      }
+            ${isLoggedIn
+      ? `<span>$${p.price_min ?? '?'} - $${p.price_max ?? '?'}</span>`
+      : `<span class="muted">Log in to view prices</span>`
+    }
           </div>
         </div>
         <div class="stars-row">${stars(p.avg_rating)}</div>
@@ -69,11 +68,11 @@ function photographerCard(p: Photographer, userRole?: string): string {
 }
 
 export async function homePage(c: AppContext) {
-    const search = c.req.query('search') ?? '';
-    const university = c.req.query('university') ?? '';
-    const user = c.get('user');
+  const search = c.req.query('search') ?? '';
+  const university = c.req.query('university') ?? '';
+  const user = c.get('user');
 
-    const result = await c.env.unilens_db.prepare(`
+  const result = await c.env.unilens_db.prepare(`
     SELECT
       u.name, p.slug, p.bio, p.university,
       p.price_min, p.price_max, p.commission_open, p.avatar_url,
@@ -88,30 +87,30 @@ export async function homePage(c: AppContext) {
     ORDER BY avg_rating DESC
   `).bind(search, search, university, university).all<Photographer>();
 
-    const universities = await c.env.unilens_db.prepare(`
+  const universities = await c.env.unilens_db.prepare(`
     SELECT DISTINCT university FROM photographer_profiles WHERE university IS NOT NULL ORDER BY university
   `).all<{ university: string }>();
 
   const cards = result.results.length > 0
-        ? result.results.map(p => photographerCard(p, String(user?.role) ?? '')).join('')
-        : `<p style="grid-column:1/-1; text-align:center; color:var(--color-text-muted); padding:3rem 0;">No photographers found.</p>`;
+    ? result.results.map(p => photographerCard(p, String(user?.role) ?? '')).join('')
+    : `<p style="grid-column:1/-1; text-align:center; color:var(--color-text-muted); padding:3rem 0;">No photographers found.</p>`;
 
-    const currentFilterIcon = university
-  ? getUniversitySvg(university).replace('<svg ', '<svg width="20" height="20" ')
-  : '';
+  const currentFilterIcon = university
+    ? getUniversitySvg(university).replace('<svg ', '<svg width="20" height="20" ')
+    : '';
 
-const universityOptions = universities.results.map(u => {
-  const icon = getUniversitySvg(u.university);
-  const sized = icon ? icon.replace('<svg ', '<svg width="22" height="22" ') : '';
-  const sel = university === u.university ? ' selected' : '';
-  return `
+  const universityOptions = universities.results.map(u => {
+    const icon = getUniversitySvg(u.university);
+    const sized = icon ? icon.replace('<svg ', '<svg width="22" height="22" ') : '';
+    const sel = university === u.university ? ' selected' : '';
+    return `
     <div class="univ-filter-option${sel}" data-value="${u.university.replace(/"/g, '&quot;')}">
       <span class="univ-filter-opt-icon">${sized}</span>
       <span>${u.university}</span>
     </div>`;
-}).join('');
+  }).join('');
 
-    const html = `<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -122,10 +121,14 @@ const universityOptions = universities.results.map(u => {
     ${theme}
 
     body { padding: 0; }
-.page-content { padding: 2rem 1.5rem; }
+  .page-content { padding: 2rem 1.5rem; }
 
     ${topbarStyles}
-
+    @media (max-width: 480px) {
+  .search-box { min-width: 100%; }
+  .univ-filter-trigger { min-width: 100%; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+}
     .hero-title {
       font-family: var(--font-serif);
       font-size: 32px;
@@ -303,8 +306,8 @@ const universityOptions = universities.results.map(u => {
   <div class="univ-filter-trigger" onclick="toggleUnivFilter(event)">
     <span class="univ-filter-icon">
       ${currentFilterIcon ||
-        `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>`
-      }
+    `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>`
+    }
     </span>
     <span class="univ-filter-label">${university || 'All universities'}</span>
     <svg class="univ-filter-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -345,5 +348,5 @@ const universityOptions = universities.results.map(u => {
 </body>
 </html>`;
 
-    return c.html(html);
+  return c.html(html);
 }
