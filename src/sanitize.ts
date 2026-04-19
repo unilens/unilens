@@ -16,6 +16,10 @@ export function sanitizePortfolio(dirty: string): string {
     allowedStyles: {
       '*': {
         'display':               [/^(grid|inline-grid|flex|inline-flex|block|inline-block)$/],
+        'column-count':          [/.*/],
+        'column-gap':            [/.*/],
+        'background':            [/.*/],
+        'background-color':      [/.*/],
         'grid-template-columns': [/.*/],
         'grid-template-rows':    [/.*/],
         'grid-template-areas':   [/.*/],
@@ -23,7 +27,6 @@ export function sanitizePortfolio(dirty: string): string {
         'grid-row':              [/.*/],
         'grid-gap':              [/.*/],
         'gap':                   [/.*/],
-        'column-gap':            [/.*/],
         'row-gap':               [/.*/],
         'align-items':           [/.*/],
         'justify-items':         [/.*/],
@@ -41,7 +44,6 @@ export function sanitizePortfolio(dirty: string): string {
         'color':       [/.*/],
         'font-size':   [/.*/],
         'text-align':  [/.*/],
-        'background-color': [/.*/]
       }
     },
     allowedSchemesAppliedToAttributes: ['href', 'src'],
