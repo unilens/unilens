@@ -4,7 +4,7 @@ import { Env, Variables } from './types';
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_SIZE = 25 * 1024 * 1024; // 25MB
 
 export async function uploadImage(c: AppContext) {
   const user = c.get('user');
