@@ -9,10 +9,10 @@ export function getUniversitySvg(name: string): string {
 
 export const universities: University[] = [
   {
-    name: 'Faketown College',
+    name: 'Exampletown College',
     svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#0cba35"/>
-      <text x="20" y="25" text-anchor="middle" font-family="serif" font-weight="bold" font-size="13" fill="white">EX</text>
+      <circle cx="20" cy="20" r="20" fill="#fbff00"/>
+      <text x="20" y="25" text-anchor="middle" font-family="serif" font-weight="bold" font-size="13" fill="red">EX</text>
     </svg>`,
   },
     {
@@ -23,6 +23,13 @@ export const universities: University[] = [
     </svg>`,
   },
   {
+    name: 'University of Vermont',
+    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="20" cy="20" r="20" fill="#077e23"/>
+      <text x="20" y="25" text-anchor="middle" font-family="serif" font-weight="bold" font-size="13" fill="gold">UVM</text>
+    </svg>`,
+  },
+  /*{
     name: 'Georgia Institute of Technology',
     svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
       <circle cx="20" cy="20" r="20" fill="#003057"/>
@@ -84,5 +91,5 @@ export const universities: University[] = [
       <circle cx="20" cy="20" r="20" fill="#002878"/>
       <text x="20" y="25" text-anchor="middle" font-family="serif" font-weight="bold" font-size="10" fill="#F2A900">EMO</text>
     </svg>`,
-  },
+  },*/
 ];
