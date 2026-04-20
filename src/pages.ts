@@ -10,7 +10,7 @@ export function loginPage(c: AppContext) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Log in — UniLens</title>
+  <title>Log in - UniLens</title>
   ${favicon}
   <style>
     ${theme}
@@ -83,7 +83,7 @@ export function registerPage(c: AppContext) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign up — UniLens</title>
+  <title>Sign up - UniLens</title>
   ${favicon}
   <style>
     ${theme}
@@ -144,6 +144,155 @@ export function registerPage(c: AppContext) {
       Continue with Google
     </a>
     <p class="alt-link">Already have an account? <a href="/login">Log in</a></p>
+  </div>
+</body>
+</html>`;
+  return c.html(html);
+}
+
+export function aboutPage(c: AppContext) {
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About - UniLens</title>
+  ${favicon}
+  <style>
+    ${theme}
+    ${topbarStyles}
+    body { padding: 0; }
+    .page {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 6rem;
+    }
+    .page-title {
+      font-family: var(--font-serif);
+      font-size: 40px;
+      font-weight: 400;
+      margin-bottom: 0.5rem;
+    }
+    .lead {
+      font-size: 17px;
+      color: var(--color-text-muted);
+      line-height: 1.7;
+      margin-bottom: 3rem;
+    }
+    .section {
+      margin-bottom: 2.5rem;
+    }
+    .section h2 {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 400;
+      margin-bottom: 0.75rem;
+    }
+    .section p {
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--color-text-muted);
+    }
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 1rem;
+    }
+    .step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-text { font-size: 15px; line-height: 1.7; color: var(--color-text-muted); }
+    .step-text strong { color: var(--color-text); }
+    hr { border: none; border-top: 1px solid var(--color-border); margin: 2.5rem 0; }
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      background: var(--color-primary);
+      color: white;
+      border-radius: var(--radius-full);
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: opacity 0.15s;
+      margin-top: 1rem;
+    }
+    .cta:hover { opacity: 0.8; }
+  </style>
+</head>
+<body>
+  ${topbar('about', '')}
+  <div class="page">
+    <h1 class="page-title">About UniLens (pre-α)</h1>
+    <p class="lead">Unilens is currently in the pre-α stage. Please note that this is a prototype and not all features may be fully functional. We're actively developing the platform and appreciate your understanding as we work towards a full launch. If you're interested in testing or providing feedback, please don't hesitate to reach out!</p>
+    <p class="lead">UniLens connects college students with talented photographers on their campus. We make it easy to find someone who knows your school, your style, and your budget.</p>
+
+    <div class="section">
+      <h2>Why UniLens?</h2>
+      <p>Finding a good photographer as a student is harder than it should be. Generic platforms are expensive and impersonal. Instagram DMs get lost. UniLens is built specifically for the college market so that photographers can list their portfolio and pricing, clients can browse and reach out, and trust is built through real peer reviews.</p>
+    </div>
+
+    <hr>
+
+    <div class="section">
+      <h2>How it works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-text"><strong>Browse photographers</strong> - filter by university, price, and availability.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-text"><strong>Send an inquiry</strong> - introduce yourself and describe your shoot.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-text"><strong>Get accepted</strong> - the photographer reviews your request and accepts or declines.</div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-text"><strong>Leave a rating</strong> - after your shoot, rate your experience to help the community.</div>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+
+    <div class="section">
+      <h2>For photographers</h2>
+      <p>Set up your profile in minutes. Upload your portfolio, set your price range, and toggle your availability. You control who you work with - accept inquiries that fit your schedule and decline the rest.</p>
+    </div>
+
+    <div class="section">
+      <h2>For clients</h2>
+      <p>Every photographer on UniLens is a fellow student. Browse real portfolios, see honest peer reviews, and reach out directly. No middlemen, no booking fees.</p>
+    </div>
+
+    <hr>
+
+    <div class="section">
+      <h2>Get started</h2>
+      <p>Sign up with your Google account and pick your role. It takes under a minute.</p>
+      <a href="/register" class="cta">Join UniLens</a>
+    </div>
   </div>
 </body>
 </html>`;

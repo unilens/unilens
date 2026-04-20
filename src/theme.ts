@@ -102,7 +102,7 @@ export function topbar(
   <nav class="topbar">
     <a href="/" class="logo">
       ${logoSvg}
-      <span class="logo-title">UniLens</span>
+      <span class="logo-title">UniLens (pre-α)</span>
     </a>
     <div class="nav-links">
       <a href="/" ${active === 'home' ? 'style="color:var(--color-accent);"' : ''}>Home</a>

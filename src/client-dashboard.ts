@@ -40,24 +40,24 @@ export async function clientDashboardPage(c: AppContext) {
   `).bind(user.id).all<{ status: string; message: string | null; created_at: number; photographer_name: string; slug: string; avatar_url: string | null }>();
 
   // Suggested photographers (open for commission, highest rated)
-  const suggested = await c.env.unilens_db.prepare(`
+  const saved = await c.env.unilens_db.prepare(`
     SELECT
       u.name, p.slug, p.university, p.avatar_url,
-      p.price_min, p.price_max,
+      p.price_min, p.price_max, p.user_id,
       ROUND(AVG(r.score), 1) AS avg_rating,
       COUNT(r.id) AS review_count
-    FROM photographer_profiles p
+    FROM saved_photographers sp
+    JOIN photographer_profiles p ON p.user_id = sp.photographer_id
     JOIN users u ON u.id = p.user_id
     LEFT JOIN ratings r ON r.photographer_id = p.user_id
-    WHERE p.commission_open = 1
+    WHERE sp.client_id = ?
     GROUP BY p.user_id
-    ORDER BY avg_rating DESC
-    LIMIT 6
-  `).all<{
+    ORDER BY u.name ASC
+  `).bind(user.id).all<{
     name: string; slug: string; university: string;
     avatar_url: string | null; price_min: number | null;
     price_max: number | null; avg_rating: number | null;
-    review_count: number;
+    review_count: number; user_id: string;
   }>();
 
   function stars(avg: number | null) {
@@ -97,14 +97,13 @@ export async function clientDashboardPage(c: AppContext) {
       }).join('')
     : `<p style="color:var(--color-text-muted);font-size:14px;">You haven't rated anyone yet. <a href="/" style="color:var(--color-accent);">Browse photographers</a></p>`;
 
-  const suggestedCards = suggested.results.map(p => `
+  const savedCards = saved.results.map(p => `
     <a href="/p/${p.slug}" style="display:block;text-decoration:none;color:inherit;">
       <div class="sug-card">
         <div class="sug-avatar">${avatarHtml(p.avatar_url, p.name)}</div>
         <div class="sug-name">${p.name}</div>
         <div class="sug-stars">${stars(p.avg_rating)}</div>
         <div class="sug-price">$${p.price_min ?? '?'} – $${p.price_max ?? '?'}</div>
-        <span class="open-badge">Open for Commission</span>
       </div>
     </a>
   `).join('');
@@ -233,10 +232,10 @@ export async function clientDashboardPage(c: AppContext) {
     <h1 class="welcome">Welcome back, ${user.name as string}</h1>
     <p class="welcome-sub">Find photographers, track your reviews, and book your next shoot.</p>
 
-    <p class="section-label">Photographers available now</p>
-    ${suggested.results.length > 0
-      ? `<div class="sug-grid">${suggestedCards}</div>`
-      : `<p style="color:var(--color-text-muted);font-size:14px;margin-bottom:3rem;">No photographers open for commission right now.</p>`
+    <p class="section-label">Saved photographers</p>
+    ${saved.results.length > 0
+      ? `<div class="sug-grid">${savedCards}</div>`
+      : `<p style="color:var(--color-text-muted);font-size:14px;margin-bottom:3rem;">No saved photographers yet. <a href="/" style="color:var(--color-accent);">Browse photographers</a> and click the bookmark icon to save them.</p>`
     }
 
     <p class="section-label">Your ratings</p>

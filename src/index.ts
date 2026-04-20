@@ -5,14 +5,14 @@ import { savePortfolio, getProfile, getPhotographers } from './portfolio';
 import { uploadImage } from './upload';
 import { ratePhotographer } from './ratings';
 import { homePage } from './home';
-import { loginPage, registerPage } from './pages';
+import { loginPage, registerPage, aboutPage } from './pages';
 import { roleSelectPage } from './role';
 import { dashboardPage } from './dashboard';
 import { sendContactRequest, acceptContactRequest, declineContactRequest } from './contact';
 import { clientDashboardPage } from './client-dashboard';
 import { inquiriesPage } from './inquiries';
 import { sanitizePortfolio } from './sanitize';
-
+import { toggleSave } from './save';
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
 
@@ -24,6 +24,8 @@ app.get('/dashboard', requireAuth, dashboardPage);
 app.get('/dashboard/client', requireAuth, clientDashboardPage);
 app.get('/inquiries', requireAuth, inquiriesPage);
 app.get('/', softAuth, homePage);
+app.post('/save/:id', requireAuth, toggleSave);
+app.get('/about', aboutPage);
 app.get('/p/:slug', softAuth, getProfile);
 app.get('/photographers', getPhotographers);
 app.get('/', homePage);

@@ -81,6 +81,12 @@ export async function getProfile(c: AppContext) {
     ).join('');
   };
 
+  const isSaved = user?.role === 'client'
+    ? !!(await c.env.unilens_db.prepare(
+        `SELECT 1 FROM saved_photographers WHERE client_id = ? AND photographer_id = ?`
+      ).bind(user?.id, profile.user_id).first())
+    : false;
+
   const commissionBadge = profile.commission_open
     ? `<span class="badge open">Open for Commission</span>`
     : `<span class="badge closed">Not Available</span>`;
@@ -318,6 +324,18 @@ ${profile.university ?? 'University not set'}
           ${priceHtml}
         </div>
         ${commissionBadge}
+        ${userRole === 'client' ? `
+        <button id="save-btn" onclick="toggleSave()"
+          style="display:inline-flex;align-items:center;gap:6px;margin-top:10px;
+                 background:none;border:1.5px solid var(--color-border);border-radius:var(--radius-full);
+                 padding:5px 14px;font-family:var(--font-sans);font-size:12px;font-weight:500;
+                 cursor:pointer;transition:border-color 0.15s;">
+          <svg id="save-icon" width="14" height="14" viewBox="0 0 24 24"
+            fill="${isSaved ? '#e2a800' : 'white'}" stroke="#111" stroke-width="1.5" stroke-linejoin="round">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+          <span id="save-label">${isSaved ? 'Saved' : 'Save'}</span>
+        </button>` : ''}
         ${userRole === 'client' && profile.commission_open ? (() => {
       if (existingRequest?.status === 'accepted') {
         return `<div style="margin-top:10px;font-size:12px;color:#1a6e3c;font-weight:500;">✓ Request accepted — you can now rate this photographer</div>`;
@@ -419,6 +437,17 @@ ${userRole === 'client' ? `
         }
       }
       window.sendInquiry = sendInquiry;
+
+      let isSaved = ${isSaved};
+      async function toggleSave() {
+        const res = await fetch('/save/${profile.user_id}', { method: 'POST' });
+        const d = await res.json();
+        if (!res.ok) return;
+        isSaved = d.saved;
+        document.getElementById('save-icon').setAttribute('fill', isSaved ? '#e2a800' : 'white');
+        document.getElementById('save-label').textContent = isSaved ? 'Saved' : 'Save';
+      }
+      window.toggleSave = toggleSave;
     })();
   </script>` : ''}
 </body>

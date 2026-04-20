@@ -7,16 +7,17 @@ import { getUniversitySvg } from './universities';
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
 
 interface Photographer {
-  name: string;
-  slug: string;
-  bio: string;
-  university: string;
-  price_min: number | null;
-  price_max: number | null;
-  commission_open: number;
-  avatar_url: string | null;
-  avg_rating: number | null;
-  review_count: number;
+    name: string;
+    slug: string;
+    bio: string;
+    university: string;
+    price_min: number | null;
+    price_max: number | null;
+    commission_open: number;
+    avatar_url: string | null;
+    avg_rating: number | null;
+    review_count: number;
+    user_id: string;
 }
 
 function stars(avg: number | null): string {
@@ -37,26 +38,34 @@ function avatar(p: Photographer): string {
   </svg>`;
 }
 
-function photographerCard(p: Photographer, userRole?: string): string {
+function photographerCard(p: Photographer, userRole?: string, savedIds?: Set<string>): string {
   const isLoggedIn = userRole === 'photographer' || userRole === 'client';
+  const isSaved = savedIds?.has(p.user_id) ?? false;
+  const saveBtn = `
+    <button class="save-btn" data-id="${p.user_id}" onclick="toggleSave(event,'${p.user_id}')" title="${isSaved ? 'Unsave' : 'Save'}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="${isSaved ? '#e2a800' : 'white'}" stroke="#111" stroke-width="1.5" stroke-linejoin="round">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+      </svg>
+    </button>`;
   return `
     <a href="/p/${p.slug}" style="display:block; text-decoration:none; color:inherit;">
       <div class="card">
+        ${saveBtn}
         <div class="avatar-wrap">${avatar(p)}</div>
         <div class="card-meta">
           <div class="meta-row">
             ${p.university && getUniversitySvg(p.university)
-      ? `<span style="width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;">${getUniversitySvg(p.university).replace('<svg ', '<svg width="18" height="18" ')}</span>`
-      : `<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>`
-    }
-<span>${p.university ?? '—'}</span>
+              ? `<span style="width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;">${getUniversitySvg(p.university).replace('<svg ', '<svg width="18" height="18" ')}</span>`
+              : `<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>`
+            }
+            <span>${p.university ?? '—'}</span>
           </div>
           <div class="meta-row">
             <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 4.5h10M3 8h6M5 11.5L8 13l3-1.5V3.5a1 1 0 00-1-1H6a1 1 0 00-1 1v8z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             ${isLoggedIn
-      ? `<span>$${p.price_min ?? '?'} - $${p.price_max ?? '?'}</span>`
-      : `<span class="muted">Log in to view prices</span>`
-    }
+              ? `<span>$${p.price_min ?? '?'} - $${p.price_max ?? '?'}</span>`
+              : `<span class="muted">Log in to view prices</span>`
+            }
           </div>
         </div>
         <div class="stars-row">${stars(p.avg_rating)}</div>
@@ -71,11 +80,19 @@ export async function homePage(c: AppContext) {
   const search = c.req.query('search') ?? '';
   const university = c.req.query('university') ?? '';
   const user = c.get('user');
+  const savedSet = new Set<string>();
+    if (user?.role === 'client') {
+      const saved = await c.env.unilens_db.prepare(
+        `SELECT photographer_id FROM saved_photographers WHERE client_id = ?`
+      ).bind(user.id).all<{ photographer_id: string }>();
+      saved.results.forEach(r => savedSet.add(r.photographer_id));
+    }
 
   const result = await c.env.unilens_db.prepare(`
     SELECT
       u.name, p.slug, p.bio, p.university,
       p.price_min, p.price_max, p.commission_open, p.avatar_url,
+      p.user_id,
       ROUND(AVG(r.score), 1) AS avg_rating,
       COUNT(r.id)            AS review_count
     FROM photographer_profiles p
@@ -92,8 +109,8 @@ export async function homePage(c: AppContext) {
   `).all<{ university: string }>();
 
   const cards = result.results.length > 0
-    ? result.results.map(p => photographerCard(p, String(user?.role) ?? '')).join('')
-    : `<p style="grid-column:1/-1; text-align:center; color:var(--color-text-muted); padding:3rem 0;">No photographers found.</p>`;
+        ? result.results.map(p => photographerCard(p, String(user?.role ?? ''), savedSet)).join('')
+        : `<p style="grid-column:1/-1; text-align:center; color:var(--color-text-muted); padding:3rem 0;">No photographers found.</p>`;
 
   const currentFilterIcon = university
     ? getUniversitySvg(university).replace('<svg ', '<svg width="20" height="20" ')
@@ -249,6 +266,7 @@ export async function homePage(c: AppContext) {
     }
 
     .card {
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -259,6 +277,18 @@ export async function homePage(c: AppContext) {
       transition: border-color 0.15s, transform 0.15s;
       cursor: pointer;
     }
+    .save-btn {
+      position: absolute;
+      top: 8px; right: 8px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      line-height: 0;
+      z-index: 1;
+    }
+    .save-btn:hover { background: rgba(0,0,0,0.06); }
 
     .card:hover {
       border-color: var(--color-primary);
@@ -341,6 +371,22 @@ export async function homePage(c: AppContext) {
     });
   });
 
+  var isClient = ${user?.role === 'client' ? 'true' : 'false'};
+  var savedIds = new Set(${JSON.stringify([...savedSet])});
+  async function toggleSave(e, photographerId) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isClient) { window.location.href = '/login'; return; }
+    var res = await fetch('/save/' + photographerId, { method: 'POST' });
+    var data = await res.json();
+    if (!res.ok) return;
+    document.querySelectorAll('.save-btn[data-id="' + photographerId + '"]').forEach(function(btn) {
+      btn.querySelector('svg').setAttribute('fill', data.saved ? '#e2a800' : 'white');
+      btn.title = data.saved ? 'Unsave' : 'Save';
+    });
+    if (data.saved) savedIds.add(photographerId);
+    else savedIds.delete(photographerId);
+  }
   document.addEventListener('click', () => {
     document.getElementById('univ-filter').classList.remove('open');
   });
