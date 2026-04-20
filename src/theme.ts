@@ -89,8 +89,8 @@ export const logoSvg = `<svg width="40" height="40" viewBox="0 0 48 48" xmlns="h
   <path fill="#ffffff" d="m 5,1.5 h 38 c 0.554,0 1,0.446 1,1 v 43 c 0,0.554 -0.446,1 -1,1 H 5 c -0.554,0 -1,-0.446 -1,-1 v -43 c 0,-0.554 0.446,-1 1,-1 z"/>
   <rect fill="#000000" width="37.5" height="30" x="5.25" y="3" ry="1" rx="1"/>
   <rect fill="#c8c8c8" width="37.5" height="11.5" x="5.25" y="-45.5" ry="1.15" transform="scale(1,-1)" rx="1"/>
-  <text font-weight="bold" font-size="11.8" font-family="sans-serif" fill="#000000" x="7.04" y="43.4" transform="scale(0.984,1.017)">LENS</text>
-  <text font-weight="bold" font-size="18.5" font-family="sans-serif" fill="#ffffff" x="9.38" y="23.04" transform="scale(0.916,1.091)">UNI</text>
+  <text font-weight="bold" font-size="11.84" font-family="Arial,sans-serif" fill="#000000" x="8.455" y="43.397" transform="scale(0.9835,1.0168)">LENS</text>
+  <text font-weight="bold" font-size="21.87" font-family="Arial,sans-serif" fill="#ffffff" x="7.282" y="25.275" transform="scale(0.9164,1.0912)">UNI</text>
 </svg>`;
 
 export function topbar(
@@ -115,4 +115,4 @@ export function topbar(
   </nav>`;
 }
 
-export const favicon = `<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg width='48' height='48' viewBox='0 0 48 48' xmlns='http://www.w3.org/2000/svg'><circle fill='%23000000' cx='24' cy='24' r='24'/><path fill='%23ffffff' d='m 5,1.5 h 38 c .554,0 1,.446 1,1 v 43 c 0,.554-.446,1-1,1 H 5 c-.554,0-1-.446-1-1 v-43 c 0-.554.446-1 1-1 z'/><rect fill='%23000000' width='37.5' height='30' x='5.25' y='3' rx='1'/><rect fill='%23c8c8c8' width='37.5' height='11.5' x='5.25' y='-45.5' transform='scale(1,-1)' rx='1'/><text font-weight='bold' font-size='11.8' font-family='sans-serif' fill='%23000000' x='7' y='43' transform='scale(.984,1.017)'>LENS</text><text font-weight='bold' font-size='18.5' font-family='sans-serif' fill='%23ffffff' x='9' y='23' transform='scale(.916,1.091)'>UNI</text></svg>">`;
+export const favicon = `<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg width='48' height='48' viewBox='0 0 48 48' xmlns='http://www.w3.org/2000/svg'><circle fill='%23000000' cx='24' cy='24' r='24'/><path fill='%23ffffff' d='m 5,1.5 h 38 c .554,0 1,.446 1,1 v 43 c 0,.554-.446,1-1,1 H 5 c-.554,0-1-.446-1-1 v-43 c 0-.554.446-1 1-1 z'/><rect fill='%23000000' width='37.5' height='30' x='5.25' y='3' rx='1'/><rect fill='%23c8c8c8' width='37.5' height='11.5' x='5.25' y='-45.5' transform='scale(1,-1)' rx='1'/><text font-weight='bold' font-size='11.84' font-family='Arial,sans-serif' fill='%23000000' x='8.455' y='43.397' transform='scale(.9835,1.0168)'>LENS</text><text font-weight='bold' font-size='21.87' font-family='Arial,sans-serif' fill='%23ffffff' x='7.282' y='25.275' transform='scale(.9164,1.0912)'>UNI</text></svg>">`;

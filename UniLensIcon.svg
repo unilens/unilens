@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="96"
+   height="96"
+   viewBox="0 0 48 48"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="UniLensIcon.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   inkscape:export-filename="UniLensIcon.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="5.6936827"
+     inkscape:cx="26.432804"
+     inkscape:cy="73.502515"
+     inkscape:window-width="1920"
+     inkscape:window-height="991"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <defs
+     id="defs1" />
+  <g
+     id="layer1">
+    <circle
+       style="display:inline;fill:#000000;fill-opacity:1;stroke-width:4.14409;stroke-linecap:round;stroke-dasharray:0, 45.5848;paint-order:fill markers stroke"
+       id="path1"
+       cx="24"
+       cy="24"
+       r="24"
+       sodipodi:insensitive="true" />
+    <path
+       style="display:inline;fill:#ffffff;fill-opacity:1;stroke-width:4.60149;stroke-linecap:round;stroke-dasharray:0, 50.6165;paint-order:fill markers stroke"
+       id="rect1"
+       width="40"
+       height="45"
+       x="4"
+       y="1.5"
+       d="m 5,1.5 h 38 c 0.554,0 1,0.446 1,1 v 43 c 0,0.554 -0.446,1 -1,1 H 5 c -0.554,0 -1,-0.446 -1,-1 v -43 c 0,-0.554 0.446,-1 1,-1 z"
+       rx="1"
+       ry="1"
+       sodipodi:insensitive="true" />
+    <rect
+       style="display:inline;fill:#000000;fill-opacity:1;stroke-width:3.87715;stroke-linecap:round;stroke-dasharray:0, 42.6486;paint-order:fill markers stroke"
+       id="rect2"
+       width="37.5"
+       height="30"
+       x="5.25"
+       y="3"
+       ry="1"
+       rx="1"
+       sodipodi:insensitive="true" />
+    <rect
+       style="display:inline;fill:#c8c8c8;fill-opacity:1;stroke-width:3.9209;stroke-linecap:round;stroke-dasharray:0, 43.13;paint-order:fill markers stroke"
+       id="rect3"
+       width="37.5"
+       height="11.5"
+       x="5.25"
+       y="-45.5"
+       ry="1.1499999"
+       transform="scale(1,-1)"
+       rx="1"
+       sodipodi:insensitive="true" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:11.8356px;line-height:0;font-family:Arial;-inkscape-font-specification:'Arial, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#000000;fill-opacity:1;stroke-width:0.745556;stroke-linecap:round;stroke-dasharray:0, 8.20109;paint-order:fill markers stroke"
+       x="8.4548693"
+       y="43.397217"
+       id="text4"
+       transform="scale(0.98351385,1.0167625)"><tspan
+         id="tspan4"
+         x="8.4548693"
+         y="43.397217"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:11.8356px;font-family:Arial;-inkscape-font-specification:'Arial, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke-width:0.745556">LENS</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:21.8698px;line-height:0;font-family:Arial;-inkscape-font-specification:'Arial, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.37764;stroke-linecap:round;stroke-dasharray:0, 15.1543;stroke-opacity:1;paint-order:fill markers stroke"
+       x="7.2820845"
+       y="25.274815"
+       id="text5"
+       transform="scale(0.91643034,1.0911904)"><tspan
+         id="tspan5"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:21.8698px;font-family:Arial;-inkscape-font-specification:'Arial, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#ffffff;stroke-width:1.37763"
+         x="7.2820845"
+         y="25.274815">UNI</tspan></text>
+  </g>
+</svg>
