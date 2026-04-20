@@ -4,7 +4,7 @@ import { Env, Variables } from './types';
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const MAX_SIZE = 25 * 1024 * 1024; // 25MB
+const MAX_SIZE = 15 * 1024 * 1024; // 15MB
 
 export async function uploadImage(c: AppContext) {
   const user = c.get('user');
@@ -18,7 +18,7 @@ export async function uploadImage(c: AppContext) {
 
   if (!file) return c.json({ error: 'No image provided' }, 400);
   if (!ALLOWED_TYPES.includes(file.type)) return c.json({ error: 'Only JPEG, PNG, WebP, and GIF are allowed' }, 400);
-  if (file.size > MAX_SIZE) return c.json({ error: 'Image must be under 5MB' }, 400);
+  if (file.size > MAX_SIZE) return c.json({ error: 'Compressed image must be under 15MB' }, 400);
 
   const ext = file.type.split('/')[1];
   const key = `${user.id}/${crypto.randomUUID()}.${ext}`;

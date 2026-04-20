@@ -822,57 +822,109 @@ export async function dashboardPage(c: AppContext) {
     }
 
     async function uploadAvatar(input) {
-      var file = input.files[0];
-      if (!file) return;
-      var fd = new FormData();
-      fd.append('image', file);
-      var res = await fetch('/upload', { method: 'POST', body: fd });
-      var data = await res.json();
-      if (res.ok) {
-        avatarUrl = data.url;
-        var img = document.getElementById('avatar-preview');
-        img.src = avatarUrl;
-        img.style.display = 'block';
-        document.getElementById('avatar-placeholder').style.display = 'none';
-        var previewImg = document.getElementById('preview-avatar-img');
-        previewImg.src = avatarUrl;
-        previewImg.style.display = 'block';
-        document.getElementById('preview-avatar-placeholder').style.display = 'none';
-        showToast('Avatar uploaded!');
-      } else {
-        showToast('Upload failed: ' + data.error);
+  var file = input.files[0];
+  if (!file) return;
+
+  // Compress if over 25MB
+  if (file.size > 25 * 1024 * 1024) {
+    showToast('Image too large (max 25MB)');
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    file = await compressImage(file, 5 * 1024 * 1024);
+  }
+
+  var fd = new FormData();
+  fd.append('image', file);
+  var res = await fetch('/upload', { method: 'POST', body: fd });
+  var data = await res.json();
+  if (res.ok) {
+    avatarUrl = data.url;
+    var img = document.getElementById('avatar-preview');
+    img.src = avatarUrl;
+    img.style.display = 'block';
+    document.getElementById('avatar-placeholder').style.display = 'none';
+    var previewImg = document.getElementById('preview-avatar-img');
+    previewImg.src = avatarUrl;
+    previewImg.style.display = 'block';
+    document.getElementById('preview-avatar-placeholder').style.display = 'none';
+    showToast('Avatar uploaded!');
+  } else {
+    showToast('Upload failed: ' + data.error);
+  }
+}
+
+function compressImage(file, targetBytes) {
+  return new Promise(function(resolve) {
+    var img = new Image();
+    var url = URL.createObjectURL(file);
+    img.onload = function() {
+      URL.revokeObjectURL(url);
+      var canvas = document.createElement('canvas');
+      var scale = Math.min(1, Math.sqrt(targetBytes / file.size));
+      canvas.width  = Math.round(img.width  * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      // Iteratively reduce quality until under target
+      var quality = 0.92;
+      function tryExport() {
+        canvas.toBlob(function(blob) {
+          if (blob.size <= targetBytes || quality < 0.3) {
+            resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+          } else {
+            quality -= 0.1;
+            tryExport();
+          }
+        }, 'image/jpeg', quality);
       }
-    }
+      tryExport();
+    };
+    img.src = url;
+  });
+}
 
     async function uploadImage(input) {
-      var file = input.files[0];
-      if (!file) return;
-      var fd = new FormData();
-      fd.append('image', file);
-      var res = await fetch('/upload', { method: 'POST', body: fd });
-      var data = await res.json();
-      if (res.ok) {
-        if (currentLayout === 'simple') {
-          gridImages.push(data.url);
-          renderGridThumbs();
-          updatePreview();
-          showToast('Image added to grid!');
-        } else {
-          var container = document.getElementById('uploaded-urls');
-          var link = document.createElement('a');
-          link.textContent = data.url;
-          link.title = 'Click to copy';
-          link.onclick = function() {
-            navigator.clipboard.writeText('<img src="' + data.url + '" alt="">');
-            showToast('Copied img tag to clipboard!');
-          };
-          container.prepend(link);
-          showToast('Image uploaded! Click URL to copy img tag.');
-        }
-      } else {
-        showToast('Upload failed: ' + data.error);
-      }
+  var file = input.files[0];
+  if (!file) return;
+
+  if (file.size > 35 * 1024 * 1024) {
+    showToast('Image too large (max 35MB)');
+    return;
+  }
+
+  if (file.size > 15 * 1024 * 1024) {
+    showToast('Compressing image...');
+    file = await compressImage(file, 15 * 1024 * 1024);
+  }
+
+  var fd = new FormData();
+  fd.append('image', file);
+  var res = await fetch('/upload', { method: 'POST', body: fd });
+  var data = await res.json();
+  if (res.ok) {
+    if (currentLayout === 'simple') {
+      gridImages.push(data.url);
+      renderGridThumbs();
+      updatePreview();
+      showToast('Image added to grid!');
+    } else {
+      var container = document.getElementById('uploaded-urls');
+      var link = document.createElement('a');
+      link.textContent = data.url;
+      link.title = 'Click to copy';
+      link.onclick = function() {
+        navigator.clipboard.writeText('<img src="' + data.url + '" alt="">');
+        showToast('Copied img tag to clipboard!');
+      };
+      container.prepend(link);
+      showToast('Image uploaded! Click URL to copy img tag.');
     }
+  } else {
+    showToast('Upload failed: ' + data.error);
+  }
+}
 
     async function saveProfile() {
       var btn = document.getElementById('save-btn');
