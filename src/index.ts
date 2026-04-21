@@ -44,7 +44,7 @@ app.post('/notifications/seen', requireAuth, markNotificationsSeen);
 app.get('/images', requireAuth, listImages);
 app.post('/images/delete', requireAuth, deleteImage);
 
-// Protected route example
+// Protected routes
 app.get('/me', requireAuth, c => {
   const user = c.get('user');
   return c.json({ id: user.id, name: user.name, role: user.role });
