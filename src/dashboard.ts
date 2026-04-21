@@ -946,13 +946,13 @@ function compressImage(file, targetBytes) {
   fd.append('image', file);
   var res = await fetch('/upload', { method: 'POST', body: fd });
   var data = await res.json();
-  if (res.ok) {
-    if (currentLayout === 'simple') {
-      gridImages.push(data.url);
-      renderGridThumbs();
-      updatePreview();
-      showToast('Image added to grid!');
-    } else {
+if (res.ok) {
+        if (currentLayout === 'simple') {
+          gridImages.push(data.url);
+          renderGridThumbs();
+          updatePreview();
+          showToast('Image added to grid!');
+        } else {
       var container = document.getElementById('uploaded-urls');
       var link = document.createElement('a');
       link.textContent = data.url;
@@ -963,59 +963,68 @@ function compressImage(file, targetBytes) {
       };
       container.prepend(link);
       showToast('Image uploaded! Click URL to copy img tag.');
-    }
+    } loadUploadedPhotos();
   } else {
     showToast('Upload failed: ' + data.error);
   }
 }
 
+    var uploadedImages = [];
+
     async function loadUploadedPhotos() {
-      var wrap = document.getElementById('upload-gallery-wrap');
       var res = await fetch('/images');
       var data = await res.json();
-      if (!data.images || data.images.length === 0) {
+      uploadedImages = data.images || [];
+      renderUploadGallery();
+    }
+
+    function renderUploadGallery() {
+      var wrap = document.getElementById('upload-gallery-wrap');
+      if (!uploadedImages.length) {
         wrap.innerHTML = '<div style="font-size:12px;color:var(--color-text-muted);">No uploaded photos yet.</div>';
         return;
       }
       wrap.innerHTML = '<div class="upload-gallery-grid">' +
-        data.images.map(function(img) {
-          var safeKey = encodeURIComponent(img.key);
-          var safeUrl = img.url.replace(/"/g, '&quot;');
+        uploadedImages.map(function(img, i) {
           return '<div class="upload-gallery-item">' +
-            '<img src="' + safeUrl + '" loading="lazy">' +
+            '<img src="' + img.url + '" loading="lazy">' +
             '<div class="upload-gallery-actions">' +
-              '<button class="gal-btn" onclick="galCopy(' + JSON.stringify(img.url) + ')">Copy</button>' +
-              '<button class="gal-btn del" onclick="galDelete(' + JSON.stringify(img.key) + ', ' + JSON.stringify(img.url) + ', this)">Del</button>' +
+              '<button class="gal-btn" data-action="copy" data-index="' + i + '">Copy</button>' +
+              '<button class="gal-btn del" data-action="delete" data-index="' + i + '">Del</button>' +
             '</div>' +
           '</div>';
         }).join('') +
       '</div>';
     }
 
-    function galCopy(url) {
-      navigator.clipboard.writeText('<img src="' + url + '" alt="">');
-      showToast('Copied img tag to clipboard!');
-    }
-
-    async function galDelete(key, url, btn) {
-      if (!confirm('Delete this image? This cannot be undone and will remove it from R2.')) return;
-      btn.disabled = true;
-      var res = await fetch('/images/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: key })
-      });
-      if (!res.ok) { showToast('Delete failed'); btn.disabled = false; return; }
-      // Remove from gridImages if present
-      var idx = gridImages.indexOf(url);
-      if (idx !== -1) { gridImages.splice(idx, 1); renderGridThumbs(); updatePreview(); }
-      // Remove from uploaded-urls list if present
-      var links = document.querySelectorAll('#uploaded-urls a');
-      links.forEach(function(a) { if (a.textContent === url) a.remove(); });
-      // Reload gallery
-      loadUploadedPhotos();
-      showToast('Image deleted.');
-    }
+    document.addEventListener('click', async function(e) {
+      var btn = e.target.closest('[data-action]');
+      if (!btn) return;
+      var idx = parseInt(btn.dataset.index);
+      var img = uploadedImages[idx];
+      if (!img) return;
+      if (btn.dataset.action === 'copy') {
+        navigator.clipboard.writeText('<img src="' + img.url + '" alt="">');
+        showToast('Copied img tag to clipboard!');
+      } else if (btn.dataset.action === 'delete') {
+        if (!confirm('Delete this image? This cannot be undone and will remove it from R2.')) return;
+        btn.disabled = true;
+        var res = await fetch('/images/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key: img.key })
+        });
+        if (!res.ok) { showToast('Delete failed'); btn.disabled = false; return; }
+        var gridIdx = gridImages.indexOf(img.url);
+        if (gridIdx !== -1) { gridImages.splice(gridIdx, 1); renderGridThumbs(); updatePreview(); }
+        document.querySelectorAll('#uploaded-urls a').forEach(function(a) {
+          if (a.textContent === img.url) a.remove();
+        });
+        uploadedImages.splice(idx, 1);
+        renderUploadGallery();
+        showToast('Image deleted.');
+      }
+    });
 
     async function saveProfile() {
       var btn = document.getElementById('save-btn');
