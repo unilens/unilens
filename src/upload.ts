@@ -20,6 +20,10 @@ export async function uploadImage(c: AppContext) {
   if (!ALLOWED_TYPES.includes(file.type)) return c.json({ error: 'Only JPEG, PNG, WebP, and GIF are allowed' }, 400);
   if (file.size > MAX_SIZE) return c.json({ error: 'Compressed image must be under 15MB' }, 400);
 
+  const existing = await c.env.unilens_images.list({ prefix: `${user.id}/` });
+  if (existing.objects.length >= 6) {
+    return c.json({ error: 'Upload limit reached (6 photos max)' }, 403);
+  }
   const ext = file.type.split('/')[1];
   const key = `${user.id}/${crypto.randomUUID()}.${ext}`;
 

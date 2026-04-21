@@ -653,6 +653,7 @@ export async function dashboardPage(c: AppContext) {
           Upload images
         </button>
         <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="uploadImage(this)">
+        <span id="upload-limit-msg" style="display:none;font-size:12px;color:var(--color-text-muted);margin-left:8px;">You've reached the limit of 6 photos.</span>
         <div class="uploaded-urls" id="uploaded-urls"></div>
       </div>
 
@@ -976,6 +977,25 @@ if (res.ok) {
       var data = await res.json();
       uploadedImages = data.images || [];
       renderUploadGallery();
+      updateUploadBtn();
+    }
+
+    function updateUploadBtn() {
+      var btn = document.querySelector('.upload-btn');
+      var limitMsg = document.getElementById('upload-limit-msg');
+      if (uploadedImages.length >= 6) {
+        btn.style.opacity = '0.4';
+        btn.style.pointerEvents = 'none';
+        btn.style.cursor = 'default';
+        btn.style.borderColor = 'var(--color-border)';
+        limitMsg.style.display = 'inline';
+      } else {
+        btn.style.opacity = '';
+        btn.style.pointerEvents = '';
+        btn.style.cursor = '';
+        btn.style.borderColor = '';
+        limitMsg.style.display = 'none';
+      }
     }
 
     function renderUploadGallery() {
@@ -1022,6 +1042,7 @@ if (res.ok) {
         });
         uploadedImages.splice(idx, 1);
         renderUploadGallery();
+        updateUploadBtn();
         showToast('Image deleted.');
       }
     });
