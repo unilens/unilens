@@ -111,6 +111,135 @@ export function topbar(
       ${isLoggedIn ? `<a href="/dashboard" ${active === 'dashboard' ? 'style="color:var(--color-accent);"' : ''}>Dashboard</a>` : ''}
       ${isLoggedIn ? '<a href="/auth/logout">Log out</a>' : `<a href="/login" ${active === 'login' ? 'style="color:var(--color-accent);"' : ''}>Log in</a>`}
       ${!isLoggedIn ? '<a href="/register" class="btn">Sign up</a>' : ''}
+      ${isLoggedIn ? `
+      <div class="notif-wrap" id="notif-wrap">
+        <button class="notif-btn" id="notif-btn" onclick="toggleNotifDropdown(event)" title="Notifications">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <span class="notif-badge" id="notif-badge" style="display:none;">0</span>
+        </button>
+        <div class="notif-dropdown" id="notif-dropdown">
+          <div class="notif-header">Notifications</div>
+          <div id="notif-list"><div class="notif-loading">Loading…</div></div>
+        </div>
+      </div>
+      <style>
+        .notif-wrap { position: relative; display: flex; align-items: center; }
+        .notif-btn {
+          position: relative;
+          background: none; border: none; cursor: pointer;
+          padding: 6px; border-radius: var(--radius-sm);
+          color: var(--color-text);
+          display: flex; align-items: center;
+          transition: background 0.15s;
+        }
+        .notif-btn:hover { background: var(--color-hover); }
+        .notif-badge {
+          position: absolute; top: 1px; right: 1px;
+          min-width: 16px; height: 16px;
+          background: var(--color-accent); color: white;
+          font-size: 10px; font-weight: 600;
+          border-radius: var(--radius-full);
+          display: flex; align-items: center; justify-content: center;
+          padding: 0 3px; pointer-events: none;
+        }
+        .notif-dropdown {
+          display: none;
+          position: absolute; top: calc(100% + 10px); right: 0;
+          width: 300px;
+          background: white;
+          border: 1.5px solid var(--color-border);
+          border-radius: var(--radius-md);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+          z-index: 200;
+          overflow: hidden;
+        }
+        .notif-wrap.open .notif-dropdown { display: block; }
+        .notif-header {
+          padding: 12px 16px;
+          font-size: 11px; font-weight: 600;
+          letter-spacing: 0.07em; text-transform: uppercase;
+          color: var(--color-text-muted);
+          border-bottom: 1px solid var(--color-border);
+        }
+        .notif-loading { padding: 20px 16px; font-size: 13px; color: var(--color-text-muted); }
+        .notif-empty { padding: 20px 16px; font-size: 13px; color: var(--color-text-muted); }
+        .notif-item {
+          display: block; padding: 12px 16px;
+          font-size: 13px; line-height: 1.4;
+          border-bottom: 1px solid var(--color-border);
+          color: var(--color-text); text-decoration: none;
+          transition: background 0.1s;
+        }
+        .notif-item:last-child { border-bottom: none; }
+        .notif-item:hover { background: var(--color-hover); }
+        .notif-item.unread { background: var(--color-primary-light); font-weight: 500; }
+        .notif-item.unread:hover { background: color-mix(in srgb, var(--color-primary) 20%, white); }
+        .notif-time { font-size: 11px; color: var(--color-text-muted); margin-top: 2px; font-weight: 400; }
+      </style>
+      <script>
+        (function() {
+          var loaded = false;
+          var lastSeen = 0;
+
+          function timeAgo(ts) {
+            var diff = Math.floor(Date.now() / 1000) - ts;
+            if (diff < 60) return 'just now';
+            if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+            if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+            return Math.floor(diff / 86400) + 'd ago';
+          }
+
+          async function loadNotifications() {
+            var res = await fetch('/notifications');
+            var data = await res.json();
+            var badge = document.getElementById('notif-badge');
+            if (data.unread > 0) {
+              badge.textContent = data.unread > 99 ? '99+' : data.unread;
+              badge.style.display = 'flex';
+            } else {
+              badge.style.display = 'none';
+            }
+            var list = document.getElementById('notif-list');
+            if (!data.items || data.items.length === 0) {
+              list.innerHTML = '<div class="notif-empty">No notifications yet.</div>';
+              return;
+            }
+            list.innerHTML = data.items.map(function(item) {
+              var isUnread = item.time > lastSeen;
+              return '<a class="notif-item' + (isUnread ? ' unread' : '') + '" href="' + item.href + '">' +
+                item.text +
+                '<div class="notif-time">' + timeAgo(item.time) + '</div>' +
+                '</a>';
+            }).join('');
+            lastSeen = data.items[0] ? data.items[0].time : 0;
+          }
+
+          window.toggleNotifDropdown = function(e) {
+            e.stopPropagation();
+            var wrap = document.getElementById('notif-wrap');
+            var isOpen = wrap.classList.contains('open');
+            wrap.classList.toggle('open');
+            if (!isOpen) {
+              if (!loaded) { loadNotifications(); loaded = true; }
+              fetch('/notifications/seen', { method: 'POST' });
+              document.getElementById('notif-badge').style.display = 'none';
+            }
+          };
+
+          document.addEventListener('click', function() {
+            document.getElementById('notif-wrap').classList.remove('open');
+          });
+          document.getElementById('notif-dropdown').addEventListener('click', function(e) {
+            e.stopPropagation();
+          });
+
+          // Load badge count on page load
+          loadNotifications();
+        })();
+      </script>` : ''}
     </div>
   </nav>`;
 }

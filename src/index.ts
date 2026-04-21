@@ -13,6 +13,8 @@ import { clientDashboardPage } from './client-dashboard';
 import { inquiriesPage } from './inquiries';
 import { sanitizePortfolio } from './sanitize';
 import { toggleSave } from './save';
+import { getNotifications, markNotificationsSeen } from './notifications';
+import { listImages, deleteImage } from './images';
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
 
@@ -28,7 +30,6 @@ app.post('/save/:id', requireAuth, toggleSave);
 app.get('/about', aboutPage);
 app.get('/p/:slug', softAuth, getProfile);
 app.get('/photographers', getPhotographers);
-app.get('/', homePage);
 app.get('/login',    loginPage);
 app.get('/register', registerPage);
 app.get('/register/role', roleSelectPage);
@@ -38,6 +39,10 @@ app.post('/rate/:id', requireAuth, ratePhotographer);
 app.post('/contact/:id', requireAuth, sendContactRequest);
 app.post('/contact/:id/accept', requireAuth, acceptContactRequest);
 app.post('/contact/:id/decline', requireAuth, declineContactRequest);
+app.get('/notifications', requireAuth, getNotifications);
+app.post('/notifications/seen', requireAuth, markNotificationsSeen);
+app.get('/images', requireAuth, listImages);
+app.post('/images/delete', requireAuth, deleteImage);
 
 // Protected route example
 app.get('/me', requireAuth, c => {

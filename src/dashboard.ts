@@ -542,6 +542,41 @@ export async function dashboardPage(c: AppContext) {
       color: var(--color-text-muted);
       padding: 12px 0;
     }
+
+    /* Uploaded photos gallery */
+    .upload-gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .upload-gallery-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1.5px solid var(--color-border);
+    }
+    .upload-gallery-item img { width:100%;height:100%;object-fit:cover;display:block; }
+    .upload-gallery-actions {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      display: flex; gap: 2px;
+      background: rgba(0,0,0,0.65);
+      opacity: 0;
+      transition: opacity 0.15s;
+      padding: 3px;
+    }
+    .upload-gallery-item:hover .upload-gallery-actions { opacity: 1; }
+    .gal-btn {
+      flex: 1; background: rgba(255,255,255,0.15); border: none;
+      color: white; font-size: 10px; cursor: pointer;
+      border-radius: 3px; padding: 3px 0;
+      font-family: var(--font-sans); font-weight: 500;
+      transition: background 0.1s;
+    }
+    .gal-btn:hover { background: rgba(255,255,255,0.3); }
+    .gal-btn.del { color: #ff9090; }
+    .gal-btn.del:hover { background: rgba(180,0,0,0.4); color: white; }
   </style>
 </head>
 <body>
@@ -619,6 +654,13 @@ export async function dashboardPage(c: AppContext) {
         </button>
         <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="uploadImage(this)">
         <div class="uploaded-urls" id="uploaded-urls"></div>
+      </div>
+
+      <div class="form-group">
+        <label>Uploaded photos</label>
+        <div id="upload-gallery-wrap">
+          <div style="font-size:12px;color:var(--color-text-muted);">Loading…</div>
+        </div>
       </div>
 
       <div class="form-group">
@@ -794,6 +836,7 @@ export async function dashboardPage(c: AppContext) {
 
     document.getElementById('price-min').addEventListener('input', updatePreview);
     document.getElementById('price-max').addEventListener('input', updatePreview);
+    loadUploadedPhotos();
     document.getElementById('portfolio-html').addEventListener('input', function() {
       undoStack.push(this.value);
       if (undoStack.length > 50) undoStack.shift();
@@ -925,6 +968,54 @@ function compressImage(file, targetBytes) {
     showToast('Upload failed: ' + data.error);
   }
 }
+
+    async function loadUploadedPhotos() {
+      var wrap = document.getElementById('upload-gallery-wrap');
+      var res = await fetch('/images');
+      var data = await res.json();
+      if (!data.images || data.images.length === 0) {
+        wrap.innerHTML = '<div style="font-size:12px;color:var(--color-text-muted);">No uploaded photos yet.</div>';
+        return;
+      }
+      wrap.innerHTML = '<div class="upload-gallery-grid">' +
+        data.images.map(function(img) {
+          var safeKey = encodeURIComponent(img.key);
+          var safeUrl = img.url.replace(/"/g, '&quot;');
+          return '<div class="upload-gallery-item">' +
+            '<img src="' + safeUrl + '" loading="lazy">' +
+            '<div class="upload-gallery-actions">' +
+              '<button class="gal-btn" onclick="galCopy(' + JSON.stringify(img.url) + ')">Copy</button>' +
+              '<button class="gal-btn del" onclick="galDelete(' + JSON.stringify(img.key) + ', ' + JSON.stringify(img.url) + ', this)">Del</button>' +
+            '</div>' +
+          '</div>';
+        }).join('') +
+      '</div>';
+    }
+
+    function galCopy(url) {
+      navigator.clipboard.writeText('<img src="' + url + '" alt="">');
+      showToast('Copied img tag to clipboard!');
+    }
+
+    async function galDelete(key, url, btn) {
+      if (!confirm('Delete this image? This cannot be undone and will remove it from R2.')) return;
+      btn.disabled = true;
+      var res = await fetch('/images/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: key })
+      });
+      if (!res.ok) { showToast('Delete failed'); btn.disabled = false; return; }
+      // Remove from gridImages if present
+      var idx = gridImages.indexOf(url);
+      if (idx !== -1) { gridImages.splice(idx, 1); renderGridThumbs(); updatePreview(); }
+      // Remove from uploaded-urls list if present
+      var links = document.querySelectorAll('#uploaded-urls a');
+      links.forEach(function(a) { if (a.textContent === url) a.remove(); });
+      // Reload gallery
+      loadUploadedPhotos();
+      showToast('Image deleted.');
+    }
 
     async function saveProfile() {
       var btn = document.getElementById('save-btn');
