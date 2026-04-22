@@ -881,7 +881,7 @@ export async function dashboardPage(c: AppContext) {
 
   var fd = new FormData();
   fd.append('image', file);
-  var res = await fetch('/upload', { method: 'POST', body: fd });
+  var res = await fetch('/upload/avatar', { method: 'POST', body: fd });
   var data = await res.json();
   if (res.ok) {
     avatarUrl = data.url;

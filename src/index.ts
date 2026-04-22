@@ -2,7 +2,6 @@ import { Hono } from 'hono';
 import { Env, Variables } from './types';
 import { googleLogin, googleCallback, completeRegistration, requireAuth, softAuth } from './auth';
 import { savePortfolio, getProfile, getPhotographers } from './portfolio';
-import { uploadImage } from './upload';
 import { ratePhotographer } from './ratings';
 import { homePage } from './home';
 import { loginPage, registerPage, aboutPage } from './pages';
@@ -15,6 +14,7 @@ import { sanitizePortfolio } from './sanitize';
 import { toggleSave } from './save';
 import { getNotifications, markNotificationsSeen } from './notifications';
 import { listImages, deleteImage } from './images';
+import { uploadImage, uploadAvatar } from './upload';
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
 
@@ -43,6 +43,8 @@ app.get('/notifications', requireAuth, getNotifications);
 app.post('/notifications/seen', requireAuth, markNotificationsSeen);
 app.get('/images', requireAuth, listImages);
 app.post('/images/delete', requireAuth, deleteImage);
+app.post('/upload/avatar', requireAuth, uploadAvatar);
+
 
 // Protected routes
 app.get('/me', requireAuth, c => {

@@ -37,3 +37,27 @@ export async function uploadImage(c: AppContext) {
 
   return c.json({ success: true, url, key });
 }
+
+export async function uploadAvatar(c: AppContext) {
+  const user = c.get('user');
+  if (user.role !== 'photographer') return c.json({ error: 'Only photographers can upload avatars' }, 403);
+
+  const formData = await c.req.formData();
+  const file = formData.get('image') as File | null;
+  if (!file) return c.json({ error: 'No image provided' }, 400);
+  if (!ALLOWED_TYPES.includes(file.type)) return c.json({ error: 'Only JPEG, PNG, WebP, and GIF are allowed' }, 400);
+  if (file.size > MAX_SIZE) return c.json({ error: 'Image must be under 15MB' }, 400);
+
+  // Delete old avatar(s)
+  const existing = await c.env.unilens_images.list({ prefix: `avatars/${user.id}/` });
+  await Promise.all(existing.objects.map(obj => c.env.unilens_images.delete(obj.key)));
+
+  const ext = file.type.split('/')[1];
+  const key = `avatars/${user.id}/${crypto.randomUUID()}.${ext}`;
+  await c.env.unilens_images.put(key, await file.arrayBuffer(), {
+    httpMetadata: { contentType: file.type }
+  });
+
+  const url = `https://pub-${c.env.R2_PUBLIC_ID}.r2.dev/${key}`;
+  return c.json({ success: true, url, key });
+}
