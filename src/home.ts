@@ -79,6 +79,9 @@ function photographerCard(p: Photographer, userRole?: string, savedIds?: Set<str
 export async function homePage(c: AppContext) {
   const search = c.req.query('search') ?? '';
   const university = c.req.query('university') ?? '';
+  const page = Math.max(1, parseInt(c.req.query('page') ?? '1'));
+  const PAGE_SIZE = 24;
+  const offset = (page - 1) * PAGE_SIZE;
   const user = c.get('user');
   const savedSet = new Set<string>();
     if (user?.role === 'client') {
@@ -87,6 +90,17 @@ export async function homePage(c: AppContext) {
       ).bind(user.id).all<{ photographer_id: string }>();
       saved.results.forEach(r => savedSet.add(r.photographer_id));
     }
+
+  const countRow = await c.env.unilens_db.prepare(`
+    SELECT COUNT(DISTINCT p.user_id) AS total
+    FROM photographer_profiles p
+    JOIN users u ON u.id = p.user_id
+    WHERE (? = '' OR u.name LIKE '%' || ? || '%')
+      AND (? = '' OR p.university = ?)
+  `).bind(search, search, university, university).first<{ total: number }>();
+
+  const total = countRow?.total ?? 0;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   const result = await c.env.unilens_db.prepare(`
     SELECT
@@ -102,7 +116,8 @@ export async function homePage(c: AppContext) {
       AND (? = '' OR p.university = ?)
     GROUP BY p.user_id
     ORDER BY avg_rating DESC
-  `).bind(search, search, university, university).all<Photographer>();
+    LIMIT ? OFFSET ?
+  `).bind(search, search, university, university, PAGE_SIZE, offset).all<Photographer>();
 
   const universities = await c.env.unilens_db.prepare(`
     SELECT DISTINCT university FROM photographer_profiles WHERE university IS NOT NULL ORDER BY university
@@ -111,6 +126,29 @@ export async function homePage(c: AppContext) {
   const cards = result.results.length > 0
         ? result.results.map(p => photographerCard(p, String(user?.role ?? ''), savedSet)).join('')
         : `<p style="grid-column:1/-1; text-align:center; color:var(--color-text-muted); padding:3rem 0;">No photographers found.</p>`;
+
+  function pageUrl(p: number) {
+    const params = new URLSearchParams();
+    if (search) params.set('search', search);
+    if (university) params.set('university', university);
+    if (p > 1) params.set('page', String(p));
+    const q = params.toString();
+    return q ? `/?${q}` : '/';
+  }
+
+  const paginationHtml = totalPages <= 1 ? '' : (() => {
+    const items: string[] = [];
+    if (page > 1) items.push(`<a href="${pageUrl(page - 1)}" class="pg-btn">‹ Prev</a>`);
+    for (let i = 1; i <= totalPages; i++) {
+      if (i === 1 || i === totalPages || (i >= page - 2 && i <= page + 2)) {
+        items.push(`<a href="${pageUrl(i)}" class="pg-btn${i === page ? ' pg-active' : ''}">${i}</a>`);
+      } else if (items[items.length - 1] !== '<span class="pg-ellipsis">…</span>') {
+        items.push('<span class="pg-ellipsis">…</span>');
+      }
+    }
+    if (page < totalPages) items.push(`<a href="${pageUrl(page + 1)}" class="pg-btn">Next ›</a>`);
+    return `<div class="pagination">${items.join('')}</div>`;
+  })();
 
   const currentFilterIcon = university
     ? getUniversitySvg(university).replace('<svg ', '<svg width="20" height="20" ')
@@ -152,6 +190,27 @@ export async function homePage(c: AppContext) {
       font-weight: 400;
       margin-bottom: 1.25rem;
     }
+
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 2.5rem;
+      flex-wrap: wrap;
+    }
+    .pg-btn {
+      padding: 7px 14px;
+      border: 1.5px solid var(--color-border);
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      color: var(--color-text);
+      text-decoration: none;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .pg-btn:hover { border-color: var(--color-primary); background: var(--color-hover); }
+    .pg-active { background: var(--color-primary); color: white; border-color: var(--color-primary); }
+    .pg-active:hover { background: var(--color-primary); opacity: 0.85; }
+    .pg-ellipsis { font-size: 13px; color: var(--color-text-muted); padding: 0 4px; }
 
     .search-row {
       display: flex;
@@ -354,8 +413,9 @@ export async function homePage(c: AppContext) {
     </div>
   </form>
 
-  <p class="section-label">${result.results.length} photographer${result.results.length !== 1 ? 's' : ''} found</p>
+  <p class="section-label">${total} photographer${total !== 1 ? 's' : ''} found</p>
   <div class="grid">${cards}</div>
+  ${paginationHtml}
   </div>
   <script>
   function toggleUnivFilter(e) {
