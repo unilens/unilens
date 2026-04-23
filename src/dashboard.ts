@@ -2,6 +2,7 @@ import { Context } from 'hono';
 import { Env, Variables } from './types';
 import { theme, favicon, topbarStyles, topbar } from './theme';
 import { universities, getUniversitySvg } from './universities';
+import { TIERS, getTier } from './tiers';
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
 
@@ -17,10 +18,11 @@ export async function dashboardPage(c: AppContext) {
   `).bind(user.id).first<{
     bio: string; portfolio_html: string; slug: string;
     price_min: number; price_max: number; commission_open: number;
-    avatar_url: string; university: string;
+    avatar_url: string; university: string; subscription_level: string;
     layout_mode: string; grid_images: string;
   }>();
 
+  const tierConfig = TIERS[getTier(profile?.subscription_level ?? 'basic')];
   // Resolve the currently-selected university for server-side render
   const currentUniv  = universities.find(u => u.name === profile?.university);
   const currentIcon  = currentUniv?.svg ?? '';
@@ -653,7 +655,7 @@ export async function dashboardPage(c: AppContext) {
           Upload images
         </button>
         <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="uploadImage(this)">
-        <span id="upload-limit-msg" style="display:none;font-size:12px;color:var(--color-text-muted);margin-left:8px;">You've reached the limit of 6 photos.</span>
+        <span id="upload-limit-msg" ...>You've reached the limit of ${tierConfig.photoLimit} photos on your ${tierConfig.label} plan.</span>
         <div class="uploaded-urls" id="uploaded-urls"></div>
       </div>
 
@@ -983,7 +985,7 @@ if (res.ok) {
     function updateUploadBtn() {
       var btn = document.querySelector('.upload-btn');
       var limitMsg = document.getElementById('upload-limit-msg');
-      if (uploadedImages.length >= 6) {
+      if (uploadedImages.length >= ${tierConfig.photoLimit}) {
         btn.style.opacity = '0.4';
         btn.style.pointerEvents = 'none';
         btn.style.cursor = 'default';

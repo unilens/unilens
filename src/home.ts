@@ -2,6 +2,7 @@ import { Context } from 'hono';
 import { Env, Variables } from './types';
 import { theme, favicon, topbarStyles, topbar } from './theme';
 import { getUniversitySvg } from './universities';
+import { TIERS, getTier } from './tiers';
 
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
@@ -18,6 +19,7 @@ interface Photographer {
     avg_rating: number | null;
     review_count: number;
     user_id: string;
+    subscription_level: string;
 }
 
 function stars(avg: number | null): string {
@@ -71,7 +73,8 @@ function photographerCard(p: Photographer, userRole?: string, savedIds?: Set<str
         <div class="stars-row">${stars(p.avg_rating)}</div>
         <p class="card-name">${p.name}</p>
         ${p.commission_open ? '<span class="open-badge">Open for Commission</span>' : ''}
-      </div>
+        ${TIERS[getTier(p.subscription_level)].proBadge ? '<span class="open-badge pro-card-badge">⚡ Professional</span>' : ''}
+        </div>
     </a>
   `;
 }
@@ -105,7 +108,8 @@ export async function homePage(c: AppContext) {
   const result = await c.env.unilens_db.prepare(`
     SELECT
       u.name, p.slug, p.bio, p.university,
-      p.price_min, p.price_max, p.commission_open, p.avatar_url,
+      p.price_min, p.price_max, p.commission_open, p.avatar_url, p.subscription_level,
+
       p.user_id,
       ROUND(AVG(r.score), 1) AS avg_rating,
       COUNT(r.id)            AS review_count
@@ -378,6 +382,15 @@ export async function homePage(c: AppContext) {
   background: #e6f4ee;
   color: #1a6e3c;
 }
+  .pro-card-badge {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      background: #1a1a2e;
+      color: #c9a84c;
+      margin-top: 4px;
+    }
   </style>
 </head>
 <body>

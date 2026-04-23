@@ -3,6 +3,7 @@ import { Env, Variables, PhotographerProfile } from './types';
 import { sanitizePortfolio } from './sanitize';
 import { theme, favicon, topbarStyles, topbar } from './theme';
 import { getUniversitySvg } from './universities';
+import { TIERS, getTier } from './tiers';
 
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
@@ -23,8 +24,8 @@ export async function savePortfolio(c: AppContext) {
   const sanitized = sanitizePortfolio(portfolio_html ?? '');
 
   await c.env.unilens_db.prepare(`
-  INSERT INTO photographer_profiles (user_id, bio, portfolio_html, slug, price_min, price_max, commission_open, avatar_url, university, layout_mode, grid_images)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  INSERT INTO photographer_profiles (user_id, bio, portfolio_html, slug, price_min, price_max, commission_open, avatar_url, university, layout_mode, grid_images, subscription_level)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'basic')
   ON CONFLICT(user_id) DO UPDATE SET
     bio             = excluded.bio,
     portfolio_html  = excluded.portfolio_html,
@@ -64,7 +65,8 @@ export async function getProfile(c: AppContext) {
       p.university,
       ROUND(AVG(r.score), 1)  AS avg_rating,
       COUNT(r.id)             AS review_count,
-      p.user_id
+      p.user_id,
+      p.subscription_level
     FROM photographer_profiles p
     JOIN users u ON u.id = p.user_id
     LEFT JOIN ratings r ON r.photographer_id = p.user_id
@@ -90,6 +92,19 @@ export async function getProfile(c: AppContext) {
   const commissionBadge = profile.commission_open
     ? `<span class="badge open">Open for Commission</span>`
     : `<span class="badge closed">Not Available</span>`;
+
+  const tierConfig = TIERS[getTier(profile.subscription_level ?? 'basic')];
+
+  const proBadgeHtml = tierConfig.proBadge
+    ? `<span class="badge pro-badge">⚡ Pro</span>`
+    : '';
+
+  const adSlotHtml = tierConfig.ads
+    ? `<div class="ad-slot">
+        <span class="ad-label">Advertisement</span>
+        <div class="ad-placeholder"></div>
+       </div>`
+    : '';
 
   const avatarContent = profile.avatar_url
     ? `<img src="${profile.avatar_url}" alt="${profile.name}" style="width:100%;height:100%;object-fit:cover;">`
@@ -173,6 +188,29 @@ export async function getProfile(c: AppContext) {
 @media (max-width: 700px) {
   .sidebar { position: static; }
 }
+      .pro-badge { background: #1a1a2e; color: #c9a84c; }
+
+    .ad-slot {
+      margin-top: 2rem;
+      border: 1.5px dashed var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      text-align: center;
+    }
+    .ad-label {
+      display: block;
+      font-size: 10px;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+    .ad-placeholder {
+      width: 100%;
+      height: 90px;
+      background: var(--color-hover);
+      border-radius: var(--radius-sm);
+    }
 
     .avatar {
       width: 110px; height: 110px;
@@ -324,6 +362,7 @@ ${profile.university ?? 'University not set'}
           ${priceHtml}
         </div>
         ${commissionBadge}
+        ${proBadgeHtml}
         ${userRole === 'client' ? `
         <button id="save-btn" onclick="toggleSave()"
           style="display:inline-flex;align-items:center;gap:6px;margin-top:10px;
@@ -392,6 +431,7 @@ ${profile.university ?? 'University not set'}
       <main>
   <p class="section-label">Portfolio</p>
   ${portfolioHtml}
+  ${adSlotHtml}
 </main>
 
     </div>
