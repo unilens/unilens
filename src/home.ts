@@ -3,6 +3,7 @@ import { Env, Variables } from './types';
 import { theme, favicon, topbarStyles, topbar } from './theme';
 import { getUniversitySvg } from './universities';
 import { TIERS, getTier } from './tiers';
+import { biasOrderClause } from './search-bias';
 
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
@@ -119,7 +120,7 @@ export async function homePage(c: AppContext) {
     WHERE (? = '' OR u.name LIKE '%' || ? || '%')
       AND (? = '' OR p.university = ?)
     GROUP BY p.user_id
-    ORDER BY avg_rating DESC
+    ORDER BY ${biasOrderClause()}
     LIMIT ? OFFSET ?
   `).bind(search, search, university, university, PAGE_SIZE, offset).all<Photographer>();
 

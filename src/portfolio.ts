@@ -4,6 +4,7 @@ import { sanitizePortfolio } from './sanitize';
 import { theme, favicon, topbarStyles, topbar } from './theme';
 import { getUniversitySvg } from './universities';
 import { TIERS, getTier } from './tiers';
+import { biasOrderClause } from './search-bias';
 
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
@@ -99,13 +100,6 @@ export async function getProfile(c: AppContext) {
     ? `<span class="badge pro-badge">⚡ Pro</span>`
     : '';
 
-  const adSlotHtml = tierConfig.ads
-    ? `<div class="ad-slot">
-        <span class="ad-label">Advertisement</span>
-        <div class="ad-placeholder"></div>
-       </div>`
-    : '';
-
   const avatarContent = profile.avatar_url
     ? `<img src="${profile.avatar_url}" alt="${profile.name}" style="width:100%;height:100%;object-fit:cover;">`
     : `<svg viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -165,11 +159,50 @@ export async function getProfile(c: AppContext) {
 
     body { padding: 0; }
 
-    .page-content {
-      max-width: 1100px;
-      width: 90%;
+    .page-wrapper {
+      display: grid;
+      grid-template-columns: 160px 1fr 160px;
+      gap: 0;
+      align-items: start;
+      max-width: 1440px;
       margin: 0 auto;
       padding: 2rem 0 4rem;
+    }
+
+    .page-content {
+      padding: 0 1.5rem;
+      min-width: 0;
+    }
+
+    .ad-column {
+      padding: 0 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      position: sticky;
+      top: 2rem;
+    }
+
+    .ad-column-slot {
+      width: 100%;
+      background: var(--color-hover);
+      border: 1.5px dashed var(--color-border);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .ad-column-slot.tall   { height: 600px; }
+    .ad-column-slot.medium { height: 250px; }
+
+    @media (max-width: 900px) {
+      .page-wrapper { grid-template-columns: 1fr; }
+      .ad-column { display: none; }
     }
 
     .profile-layout {
@@ -344,7 +377,13 @@ export async function getProfile(c: AppContext) {
 <body>
   ${topbar('', String(user?.role ?? ''))}
 
-  <div class="page-content">
+  <div class="page-wrapper">
+    <aside class="ad-column">
+      ${tierConfig.ads ? `
+        <div class="ad-column-slot tall">Ad</div>
+      ` : ''}
+    </aside>
+    <div class="page-content">
     <div class="profile-layout">
 
       <aside class="sidebar">
@@ -431,10 +470,15 @@ ${profile.university ?? 'University not set'}
       <main>
   <p class="section-label">Portfolio</p>
   ${portfolioHtml}
-  ${adSlotHtml}
 </main>
 
     </div>
+    </div>
+    <aside class="ad-column">
+      ${tierConfig.ads ? `
+        <div class="ad-column-slot tall">Ad</div>
+      ` : ''}
+    </aside>
   </div>
 ${userRole === 'client' ? `
   <script>
@@ -519,7 +563,7 @@ export async function getPhotographers(c: AppContext) {
     WHERE (? = '' OR u.name LIKE '%' || ? || '%')
       AND (? = '' OR p.university = ?)
     GROUP BY p.user_id
-    ORDER BY avg_rating DESC
+    ORDER BY ${biasOrderClause()}
   `).bind(search, search, university, university).all();
 
   return c.json(photographers.results);
