@@ -37,8 +37,9 @@ export async function acceptContactRequest(c: AppContext) {
 
   const req = await c.env.unilens_db.prepare(
     `SELECT * FROM contact_requests WHERE id = ? AND photographer_id = ?`
-  ).bind(id, user.id).first<{ client_id: string; photographer_id: string }>();
+  ).bind(id, user.id).first<{ client_id: string; photographer_id: string; status: string }>();
   if (!req) return c.json({ error: 'Request not found' }, 404);
+  if (req.status !== 'pending') return c.json({ error: 'Request has already been responded to' }, 409);
 
   await c.env.unilens_db.prepare(
     `UPDATE contact_requests SET status = 'accepted' WHERE id = ?`
@@ -57,9 +58,10 @@ export async function declineContactRequest(c: AppContext) {
   const id = c.req.param('id');
 
   const req = await c.env.unilens_db.prepare(
-    `SELECT id FROM contact_requests WHERE id = ? AND photographer_id = ?`
-  ).bind(id, user.id).first();
+    `SELECT id, status FROM contact_requests WHERE id = ? AND photographer_id = ?`
+  ).bind(id, user.id).first<{ id: string; status: string }>();
   if (!req) return c.json({ error: 'Request not found' }, 404);
+  if (req.status !== 'pending') return c.json({ error: 'Request has already been responded to' }, 409);
 
   await c.env.unilens_db.prepare(
     `UPDATE contact_requests SET status = 'declined' WHERE id = ?`

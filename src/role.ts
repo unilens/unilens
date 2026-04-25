@@ -80,7 +80,7 @@ export function roleSelectPage(c: AppContext) {
   </style>
 </head>
 <body>
-  ${topbar('')}
+  ${topbar('', '')}
   <div class="page-content">
     <h1 class="page-title">One more step</h1>
     <p class="page-subtitle">How will you be using UniLens?</p>

@@ -5,6 +5,7 @@ import { theme, favicon, topbarStyles, topbar } from './theme';
 import { getUniversitySvg } from './universities';
 import { TIERS, getTier } from './tiers';
 import { biasOrderClause } from './search-bias';
+import { esc } from './escape';
 
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
@@ -20,6 +21,13 @@ export async function savePortfolio(c: AppContext) {
 
   if (!slug || !/^[a-z0-9-]+$/.test(slug)) {
     return c.json({ error: 'Slug must be lowercase letters, numbers, and hyphens only' }, 400);
+  }
+
+  const slugTaken = await c.env.unilens_db.prepare(
+    `SELECT user_id FROM photographer_profiles WHERE slug = ? AND user_id != ?`
+  ).bind(slug, user.id).first();
+  if (slugTaken) {
+    return c.json({ error: 'That URL slug is already taken, please choose another' }, 409);
   }
 
   const sanitized = sanitizePortfolio(portfolio_html ?? '');
@@ -101,7 +109,7 @@ export async function getProfile(c: AppContext) {
     : '';
 
   const avatarContent = profile.avatar_url
-    ? `<img src="${profile.avatar_url}" alt="${profile.name}" style="width:100%;height:100%;object-fit:cover;">`
+    ? `<img src="${profile.avatar_url}" alt="${esc(profile.name)}" style="width:100%;height:100%;object-fit:cover;">`
     : `<svg viewBox="0 0 54 54" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="27" cy="20" r="10" fill="#333" opacity="0.8"/>
         <ellipse cx="27" cy="44" rx="16" ry="10" fill="#333" opacity="0.8"/>
@@ -117,7 +125,7 @@ export async function getProfile(c: AppContext) {
 
   // Bio
   const bioHtml = isLoggedIn
-    ? `<p style="font-size:14px;color:var(--color-text-muted);line-height:1.6;">${profile.bio ?? ''}</p>`
+    ? `<p style="font-size:14px;color:var(--color-text-muted);line-height:1.6;">${esc(profile.bio ?? '')}</p>`
     : `<div class="locked-wrap">
        <p class="locked-content" style="font-size:14px;line-height:1.6;">
          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore.
@@ -129,7 +137,7 @@ export async function getProfile(c: AppContext) {
   const portfolioHtml = isLoggedIn
     ? `<div class="custom-area">
        <iframe srcdoc="${profile.portfolio_html.replace(/"/g, '&quot;')}"
-         sandbox="allow-same-origin" title="${profile.name}'s portfolio"></iframe>
+         sandbox="" title="${esc(profile.name)}'s portfolio"></iframe>
      </div>`
     : `<div class="portfolio-locked-wrap">
        <div class="custom-area locked-content">
@@ -141,7 +149,7 @@ export async function getProfile(c: AppContext) {
              <div style='background:#d8d8d8;height:200px;border-radius:8px;'></div>
            </div>
          </body></html>"
-           sandbox="allow-same-origin" title="Locked portfolio"></iframe>
+           sandbox="" title="Locked portfolio"></iframe>
        </div>
        <div class="locked-overlay"><a href="/login">Log in to view portfolio</a></div>
      </div>`;
@@ -151,7 +159,7 @@ export async function getProfile(c: AppContext) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${profile.name} — UniLens</title>
+  <title>${esc(profile.name)} — UniLens</title>
   ${favicon}
   <style>
     ${theme}
@@ -317,6 +325,7 @@ export async function getProfile(c: AppContext) {
       min-height: 600px;
       border: none;
       display: block;
+      isolation: isolate;
     }
 
     .locked-wrap {
@@ -388,7 +397,7 @@ export async function getProfile(c: AppContext) {
 
       <aside class="sidebar">
         <div class="avatar">${avatarContent}</div>
-        <h1 class="photographer-name">${profile.name}</h1>
+        <h1 class="photographer-name">${esc(profile.name)}</h1>
         <div class="meta-row">
           ${profile.university && getUniversitySvg(profile.university)
       ? `<span style="width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;">${getUniversitySvg(profile.university).replace('<svg ', '<svg width="20" height="20" ')}</span>`

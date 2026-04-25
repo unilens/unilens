@@ -1,6 +1,7 @@
 import { Context } from 'hono';
 import { Env, Variables } from './types';
 import { theme, favicon, topbarStyles, topbar } from './theme';
+import { esc } from './escape';
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
 
@@ -27,12 +28,12 @@ export async function inquiriesPage(c: AppContext) {
         <div class="inquiry-card" id="card-${r.id}">
           <div class="iq-header">
             <div>
-              <span class="iq-name">${r.client_name}</span>
-              <span class="iq-email">${r.client_email}</span>
+              <span class="iq-name">${esc(r.client_name)}</span>
+              <span class="iq-email">${esc(r.client_email)}</span>
             </div>
             <span class="status-badge ${r.status}">${r.status}</span>
           </div>
-          ${r.message ? `<p class="iq-msg">"${r.message}"</p>` : '<p class="iq-msg no-msg">No message provided.</p>'}
+          ${r.message ? `<p class="iq-msg">"${esc(r.message)}"</p>` : '<p class="iq-msg no-msg">No message provided.</p>'}
           ${r.status === 'pending' ? `
             <div class="iq-actions" id="actions-${r.id}">
               <button class="iq-btn accept" onclick="respond('${r.id}','accept')">Accept</button>
@@ -84,11 +85,11 @@ export async function inquiriesPage(c: AppContext) {
                     <ellipse cx="27" cy="44" rx="16" ry="10" fill="var(--color-primary)" opacity="0.8"/>
                   </svg>`}
             </div>
-            <span class="iq-name">${r.photographer_name}</span>
+            <span class="iq-name">${esc(r.photographer_name)}</span>
           </div>
           <span class="status-badge ${r.status}">${r.status}</span>
         </div>
-        ${r.message ? `<p class="iq-msg">"${r.message}"</p>` : ''}
+        ${r.message ? `<p class="iq-msg">"${esc(r.message)}"</p>` : ''}
         ${r.status === 'accepted'
           ? `<p class="iq-hint">✓ You can now leave a rating on their profile.</p>`
           : r.status === 'declined'

@@ -3,6 +3,7 @@ import { Env, Variables } from './types';
 import { theme, favicon, topbarStyles, topbar } from './theme';
 import { universities, getUniversitySvg } from './universities';
 import { TIERS, getTier } from './tiers';
+import { esc } from './escape';
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
 
@@ -711,7 +712,7 @@ export async function dashboardPage(c: AppContext) {
           </svg>
         </div>
         <div>
-          <p class="preview-name">${user.name as string}</p>
+          <p class="preview-name">${esc(user.name)}</p>
           <div class="preview-meta">
             <span id="preview-university-icon" style="width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;">
   ${profile?.university && getUniversitySvg(profile.university)
@@ -871,14 +872,17 @@ export async function dashboardPage(c: AppContext) {
   var file = input.files[0];
   if (!file) return;
 
-  // Compress if over 25MB
-  if (file.size > 25 * 1024 * 1024) {
-    showToast('Image too large (max 25MB)');
+  var maxMb = ${tierConfig.maxFileMb};
+  var maxBytes = maxMb * 1024 * 1024;
+
+  if (file.size > maxBytes * 2.5) {
+    showToast('Image too large to compress, please use a smaller file');
     return;
   }
 
-  if (file.size > 5 * 1024 * 1024) {
-    file = await compressImage(file, 5 * 1024 * 1024);
+  if (file.size > maxBytes) {
+    showToast('Compressing image...');
+    file = await compressImage(file, maxBytes);
   }
 
   var fd = new FormData();
@@ -935,14 +939,17 @@ function compressImage(file, targetBytes) {
   var file = input.files[0];
   if (!file) return;
 
-  if (file.size > 35 * 1024 * 1024) {
-    showToast('Image too large (max 35MB)');
+  var maxMb = ${tierConfig.maxFileMb};
+  var maxBytes = maxMb * 1024 * 1024;
+
+  if (file.size > maxBytes * 2.5) {
+    showToast('Image too large to compress, please use a smaller file');
     return;
   }
 
-  if (file.size > 15 * 1024 * 1024) {
+  if (file.size > maxBytes) {
     showToast('Compressing image...');
-    file = await compressImage(file, 15 * 1024 * 1024);
+    file = await compressImage(file, maxBytes);
   }
 
   var fd = new FormData();

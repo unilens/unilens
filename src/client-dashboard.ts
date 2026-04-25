@@ -2,6 +2,7 @@ import { Context } from 'hono';
 import { Env, Variables } from './types';
 import { theme, favicon, topbarStyles, topbar } from './theme';
 import { getUniversitySvg } from './universities';
+import { esc } from './escape';
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
 
@@ -84,7 +85,7 @@ export async function clientDashboardPage(c: AppContext) {
           <div class="rating-card">
             <div class="rc-avatar">${avatarHtml(r.avatar_url, r.photographer_name)}</div>
             <div class="rc-body">
-              <div class="rc-name">${r.photographer_name}</div>
+              <div class="rc-name">${esc(r.photographer_name)}</div>
               <div class="rc-univ">
                 ${univSvg ? `<span style="width:14px;height:14px;display:inline-flex;align-items:center;">${univSvg.replace('<svg ', '<svg width="14" height="14" ')}</span>` : ''}
                 ${r.university ?? ''}
@@ -101,7 +102,7 @@ export async function clientDashboardPage(c: AppContext) {
     <a href="/p/${p.slug}" style="display:block;text-decoration:none;color:inherit;">
       <div class="sug-card">
         <div class="sug-avatar">${avatarHtml(p.avatar_url, p.name)}</div>
-        <div class="sug-name">${p.name}</div>
+        <div class="sug-name">${esc(p.name)}</div>
         <div class="sug-stars">${stars(p.avg_rating)}</div>
         <div class="sug-price">$${p.price_min ?? '?'} – $${p.price_max ?? '?'}</div>
       </div>
@@ -229,7 +230,7 @@ export async function clientDashboardPage(c: AppContext) {
 <body>
   ${topbar('dashboard', String(user?.role ?? ''))}
   <div class="page">
-    <h1 class="welcome">Welcome back, ${user.name as string}</h1>
+    <h1 class="welcome">Welcome back, ${esc(user.name)}</h1>
     <p class="welcome-sub">Find photographers, track your reviews, and book your next shoot.</p>
 
     <p class="section-label">Saved photographers</p>
@@ -252,7 +253,7 @@ export async function clientDashboardPage(c: AppContext) {
                           transition:border-color 0.15s;" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'">
                 <div class="rc-avatar">${avatarHtml(r.avatar_url, r.photographer_name)}</div>
                 <div style="flex:1;">
-                  <div style="font-size:14px;font-weight:500;margin-bottom:3px;">${r.photographer_name}</div>
+                  <div style="font-size:14px;font-weight:500;margin-bottom:3px;">${esc(r.photographer_name)}</div>
                   ${r.message ? `<div style="font-size:12px;color:var(--color-text-muted);font-style:italic;margin-bottom:4px;">"${r.message}"</div>` : ''}
                 </div>
                 <span style="font-size:11px;font-weight:500;padding:3px 10px;border-radius:var(--radius-full);

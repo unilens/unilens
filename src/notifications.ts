@@ -7,6 +7,8 @@ export async function getNotifications(c: AppContext) {
   const user = c.get('user');
   const seenKey = `notif_seen:${user.id}`;
   const lastSeen = parseInt(await c.env.SESSIONS.get(seenKey) ?? '0');
+  // lastSeen is stored in ms; created_at is in seconds — normalise to seconds
+  const lastSeenSec = lastSeen > 1e12 ? Math.floor(lastSeen / 1000) : lastSeen;
 
   let items: { text: string; href: string; time: number }[] = [];
 
@@ -42,7 +44,7 @@ export async function getNotifications(c: AppContext) {
   }
 
   items.sort((a, b) => b.time - a.time);
-  const unread = items.filter(i => i.time > lastSeen).length;
+  const unread = items.filter(i => i.time > lastSeenSec).length;
 
   return c.json({ items, unread });
 }
@@ -51,7 +53,7 @@ export async function markNotificationsSeen(c: AppContext) {
   const user = c.get('user');
   await c.env.SESSIONS.put(
     `notif_seen:${user.id}`,
-    String(Math.floor(Date.now() / 1000)),
+    String(Date.now()),
     { expirationTtl: 60 * 60 * 24 * 30 }
   );
   return c.json({ ok: true });
