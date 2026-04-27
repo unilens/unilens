@@ -187,7 +187,8 @@ export async function homePage(c: AppContext) {
     ${topbarStyles}
     @media (max-width: 480px) {
   .search-box { min-width: 100%; }
-  .univ-filter-trigger { min-width: 100%; }
+  .univ-filter { width: 100%; }
+  .univ-filter-trigger { min-width: 0; width: 100%; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 }
     .hero-title {
@@ -341,6 +342,7 @@ export async function homePage(c: AppContext) {
       border-radius: var(--radius-md);
       transition: border-color 0.15s, transform 0.15s;
       cursor: pointer;
+      padding-top: 2rem;
     }
     .save-btn {
       position: absolute;

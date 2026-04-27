@@ -219,6 +219,30 @@ export async function getProfile(c: AppContext) {
       gap: 2.5rem;
       align-items: start;
     }
+
+    @media (max-width: 700px) {
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .meta-row {
+    justify-content: center;
+  }
+  .locked-wrap {
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+  .custom-area iframe,
+  .portfolio-locked-wrap .custom-area iframe {
+    min-height: 300px;
+  }
+  .stars {
+    justify-content: center;
+  }
+}
       @media (max-width: 700px) {
   .profile-layout { grid-template-columns: 1fr; }
   .sidebar { position: static; }
