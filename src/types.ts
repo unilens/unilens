@@ -1,3 +1,4 @@
+
 export interface Env {
   unilens_db:           D1Database;
   SESSIONS:             KVNamespace;
@@ -6,6 +7,7 @@ export interface Env {
   GOOGLE_CLIENT_ID:     string;
   GOOGLE_CLIENT_SECRET: string;
   SESSION_SECRET:       string;
+  SEND_EMAIL: SendEmail; // in the Env interface
 }
 
 export interface Variables {

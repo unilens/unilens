@@ -14,6 +14,11 @@
 			"database_id": "6b7425ac-f93f-4707-ba13-bc31a4a1fa68"
 		}
 	],
+	"send_email": [
+		{
+		"name": "SEND_EMAIL"
+		}
+	],
 	"r2_buckets": [
 		{
 			"bucket_name": "unilens-images",
@@ -23,6 +28,10 @@
 	"vars": {
 		"R2_PUBLIC_ID": "799589576e3c496eb6cb957b041dd0b8"
 	},
+	"routes": [
+  		{ "pattern": "unilens.net/*", "zone_name": "unilens.net" },
+  		{ "pattern": "www.unilens.net/*", "zone_name": "unilens.net" }
+	],
 	"kv_namespaces": [
 		{
 			"binding": "SESSIONS",

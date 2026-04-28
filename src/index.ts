@@ -63,6 +63,9 @@ app.post('/sanitize', requireAuth, async (c) => {
   return c.json({ html: sanitizePortfolio(html ?? '') });
 });
 
-
-
-export default app;
+export default {
+  fetch: app.fetch.bind(app),
+  async email(message: ForwardableEmailMessage, env: Env, ctx: ExecutionContext) {
+    await message.forward("arimweber@gmail.com");
+  }
+};
