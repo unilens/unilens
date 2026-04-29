@@ -9,7 +9,7 @@
 // REVIEW_COUNT_BIAS: per-review bonus, capped at 10 reviews
 
 export const PRO_BIAS          = 0.75;
-export const OPEN_BIAS         = 0.75;
+export const OPEN_BIAS         = 0.90;
 export const PLUS_BIAS         = 0.25;
 export const RATING_BIAS       = 0.50;
 export const AVATAR_BIAS       = 0.15;

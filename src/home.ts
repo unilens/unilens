@@ -406,7 +406,7 @@ export async function homePage(c: AppContext) {
     <div class="search-row">
       <div class="search-box">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        <input type="text" name="search" placeholder="Search photographers..." value="${search}">
+        <input type="text" name="search" placeholder="Search photographers..." value="${esc(search)}">
       </div>
       <div class="univ-filter" id="univ-filter">
   <div class="univ-filter-trigger" onclick="toggleUnivFilter(event)">
@@ -415,7 +415,7 @@ export async function homePage(c: AppContext) {
     `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>`
     }
     </span>
-    <span class="univ-filter-label">${university || 'All universities'}</span>
+    <span class="univ-filter-label">${esc(university) || 'All universities'}</span>
     <svg class="univ-filter-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
       <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>
@@ -424,7 +424,7 @@ export async function homePage(c: AppContext) {
     <div class="univ-filter-option${!university ? ' selected' : ''}" data-value="">All universities</div>
     ${universityOptions}
   </div>
-  <input type="hidden" name="university" id="univ-filter-value" value="${university}">
+  <input type="hidden" name="university" id="univ-filter-value" value="${esc(university)}">
 </div>
       <button type="submit" class="btn">Search</button>
     </div>

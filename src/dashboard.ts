@@ -605,7 +605,7 @@ export async function dashboardPage(c: AppContext) {
         <div style="flex:1;">
           <div class="form-group">
             <label>Profile URL slug</label>
-            <input type="text" id="slug" placeholder="e.g. jane-smith" value="${profile?.slug ?? ''}">
+            <input type="text" id="slug" placeholder="e.g. jane-smith" value="${esc(profile?.slug ?? '')}">
           </div>
         </div>
         <input type="file" id="avatar-input" accept="image/*" style="display:none;" onchange="uploadAvatar(this)">
@@ -632,7 +632,7 @@ export async function dashboardPage(c: AppContext) {
         </div>
         <div class="form-group">
           <label>Bio</label>
-          <input type="text" id="bio" placeholder="Short bio..." value="${profile?.bio ?? ''}">
+          <input type="text" id="bio" placeholder="Short bio..." value="${esc(profile?.bio ?? '')}">
         </div>
         <div class="form-group">
           <label>Min price ($)</label>
@@ -656,7 +656,7 @@ export async function dashboardPage(c: AppContext) {
           Upload images
         </button>
         <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="uploadImage(this)">
-        <span id="upload-limit-msg" ...>You've reached the limit of ${tierConfig.photoLimit} photos on your ${tierConfig.label} plan.</span>
+        <span id="upload-limit-msg" style="display:none;font-size:12px;color:var(--color-text-muted);">You've reached the limit of ${tierConfig.photoLimit} photos on your ${tierConfig.label} plan.</span>
         <div class="uploaded-urls" id="uploaded-urls"></div>
       </div>
 
@@ -684,7 +684,7 @@ export async function dashboardPage(c: AppContext) {
 
         <!-- Custom HTML panel -->
         <div id="panel-custom" style="display:${layoutMode === 'custom' ? 'block' : 'none'};">
-          <textarea class="html-zone" id="portfolio-html" oninput="updatePreview()" onkeydown="handleUndo(event)">${profile?.portfolio_html ?? ''}</textarea>
+          <textarea class="html-zone" id="portfolio-html" oninput="updatePreview()" onkeydown="handleUndo(event)">${esc(profile?.portfolio_html ?? '')}</textarea>
         </div>
       </div>
 
@@ -745,7 +745,7 @@ export async function dashboardPage(c: AppContext) {
   <script>
     var commissionOn = ${profile?.commission_open ? 'true' : 'false'};
     var undoStack = [];
-    var avatarUrl = '${profile?.avatar_url ?? ''}';
+    var avatarUrl = ${JSON.stringify(profile?.avatar_url ?? null)};
     var currentLayout = '${layoutMode}';
     var gridImages = ${JSON.stringify(gridImages)};
 
