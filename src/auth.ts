@@ -104,7 +104,7 @@ export async function completeRegistration(c: AppContext) {
   await c.env.SESSIONS.put(token, id, { expirationTtl: 60 * 60 * 24 * 7 });
 
   c.header('Set-Cookie', `session=${token}; HttpOnly; Secure; SameSite=Lax; Path=/`);
-  return c.json({ success: true });
+  return c.json({ success: true, redirect: role === 'photographer' ? '/dashboard' : '/' });
 }
 
 // ---- AUTH MIDDLEWARE ----

@@ -125,7 +125,7 @@ export function roleSelectPage(c: AppContext) {
       const data = await res.json();
 
       if (res.ok) {
-        window.location.href = '/';
+        window.location.href = data.redirect || '/';
       } else {
         errorEl.textContent = data.error ?? 'Something went wrong';
         errorEl.style.display = 'block';
