@@ -15,8 +15,10 @@ import { toggleSave } from './save';
 import { getNotifications, markNotificationsSeen } from './notifications';
 import { listImages, deleteImage } from './images';
 import { uploadImage, uploadAvatar } from './upload';
+import { csrfMiddleware } from './csrf';
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
+app.use('*', csrfMiddleware);
 
 // Public routes
 app.get('/auth/login',    googleLogin);

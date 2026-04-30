@@ -1,5 +1,6 @@
 import { Context } from 'hono';
 import { Env, Variables } from './types';
+import { checkRateLimit } from './ratelimit';
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
 
@@ -10,11 +11,17 @@ export async function ratePhotographer(c: AppContext) {
     return c.json({ error: 'Only clients can submit ratings' }, 403);
   }
 
+  const rl = await checkRateLimit(c.env.SESSIONS, String(user.id), 'rate', 10, 3600);
+  if (!rl.allowed) return c.json({ error: 'Too many ratings submitted recently. Try again later.' }, 429);
+
   const photographerId = c.req.param('id');
   const { score, review } = await c.req.json();
 
   if (!score || score < 1 || score > 5) {
     return c.json({ error: 'Score must be between 1 and 5' }, 400);
+  }
+  if (review != null && String(review).length > 500) {
+    return c.json({ error: 'Review must be 500 characters or fewer' }, 400);
   }
 
   const photographer = await c.env.unilens_db.prepare(

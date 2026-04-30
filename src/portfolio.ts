@@ -22,6 +22,26 @@ export async function savePortfolio(c: AppContext) {
   if (!slug || !/^[a-z0-9-]+$/.test(slug)) {
     return c.json({ error: 'Slug must be lowercase letters, numbers, and hyphens only' }, 400);
   }
+  if (slug.length > 60) {
+    return c.json({ error: 'Slug must be 60 characters or fewer' }, 400);
+  }
+  if ((bio ?? '').length > 300) {
+    return c.json({ error: 'Bio must be 300 characters or fewer' }, 400);
+  }
+  if ((portfolio_html ?? '').length > 100_000) {
+    return c.json({ error: 'Portfolio HTML must be under 100 KB' }, 400);
+  }
+  const pMin = price_min != null ? Number(price_min) : null;
+  const pMax = price_max != null ? Number(price_max) : null;
+  if (pMin != null && (pMin < 0 || !Number.isFinite(pMin))) {
+    return c.json({ error: 'Minimum price must be a non-negative number' }, 400);
+  }
+  if (pMax != null && (pMax < 0 || !Number.isFinite(pMax))) {
+    return c.json({ error: 'Maximum price must be a non-negative number' }, 400);
+  }
+  if (pMin != null && pMax != null && pMin > pMax) {
+    return c.json({ error: 'Minimum price cannot exceed maximum price' }, 400);
+  }
 
   const slugTaken = await c.env.unilens_db.prepare(
     `SELECT user_id FROM photographer_profiles WHERE slug = ? AND user_id != ?`
@@ -46,7 +66,7 @@ export async function savePortfolio(c: AppContext) {
     university      = excluded.university,
     layout_mode     = excluded.layout_mode,
     grid_images     = excluded.grid_images
-`).bind(user.id, bio ?? '', sanitized, slug, price_min ?? null, price_max ?? null, commission_open ?? 1, avatar_url ?? null, university ?? null, layout_mode ?? 'simple', grid_images ?? '[]').run();
+`).bind(user.id, bio ?? '', sanitized, slug, pMin ?? null, pMax ?? null, commission_open ?? 1, avatar_url ?? null, university ?? null, layout_mode ?? 'simple', grid_images ?? '[]').run();
 
   return c.json({ success: true, slug });
 }

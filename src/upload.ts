@@ -1,6 +1,7 @@
 import { Context } from 'hono';
 import { Env, Variables } from './types';
 import { TIERS, getTier } from './tiers';
+import { checkRateLimit } from './ratelimit';
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
 
@@ -22,11 +23,14 @@ function detectMime(buf: ArrayBuffer): string | null {
 export async function uploadImage(c: AppContext) {
 	const user = c.get('user');
 
-	if (user.role !== 'photographer') {
-		return c.json({ error: 'Only photographers can upload images' }, 403);
-	}
+	  if (user.role !== 'photographer') {
+    return c.json({ error: 'Only photographers can upload images' }, 403);
+  }
 
-	const formData = await c.req.formData();
+  const rl = await checkRateLimit(c.env.SESSIONS, String(user.id), 'upload', 20, 3600);
+  if (!rl.allowed) return c.json({ error: 'Upload limit reached. Try again later.' }, 429);
+
+  const formData = await c.req.formData();
 	const file = formData.get('image') as File | null;
 
 	const profile = await c.env.unilens_db.prepare(
@@ -64,6 +68,9 @@ export async function uploadImage(c: AppContext) {
 export async function uploadAvatar(c: AppContext) {
 	const user = c.get('user');
 	if (user.role !== 'photographer') return c.json({ error: 'Only photographers can upload avatars' }, 403);
+
+  const rl = await checkRateLimit(c.env.SESSIONS, String(user.id), 'avatar', 10, 3600);
+  if (!rl.allowed) return c.json({ error: 'Too many avatar uploads. Try again later.' }, 429);
 
 	const avatarProfile = await c.env.unilens_db.prepare(
 		`SELECT subscription_level FROM photographer_profiles WHERE user_id = ?`
