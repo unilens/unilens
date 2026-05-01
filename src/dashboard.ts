@@ -540,8 +540,17 @@ export async function dashboardPage(c: AppContext) {
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   padding: 0;
 }
-.grid-thumb { cursor: grab; }
-.grid-thumb.drag-over { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.thumb-move {
+  position: absolute; bottom: 3px;
+  width: 18px; height: 18px;
+  background: rgba(0,0,0,0.6); color: white;
+  border: none; border-radius: 50%;
+  font-size: 11px; line-height: 1;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  padding: 0;
+}
+.thumb-move.left { left: 3px; }
+.thumb-move.right { right: 3px; }
     .grid-empty {
       font-size: 12px;
       color: var(--color-text-muted);
@@ -806,50 +815,23 @@ export async function dashboardPage(c: AppContext) {
     return;
   }
   container.innerHTML = gridImages.map(function(url, i) {
-    return '<div class="grid-thumb" id="thumb-' + i + '" draggable="true" data-index="' + i + '">' +
-      '<img src="' + url + '" alt="" draggable="false">' +
+    return '<div class="grid-thumb" id="thumb-' + i + '">' +
+      '<img src="' + url + '" alt="">' +
       '<button class="thumb-remove" onclick="removeGridImage(' + i + ')">&times;</button>' +
+      (i > 0 ? '<button class="thumb-move left" onclick="moveGridImage(' + i + ',-1)">&#8592;</button>' : '') +
+      (i < gridImages.length - 1 ? '<button class="thumb-move right" onclick="moveGridImage(' + i + ',1)">&#8594;</button>' : '') +
       '</div>';
   }).join('');
-  initThumbDrag();
 }
 
-var dragSrcIndex = null;
-
-function initThumbDrag() {
-  var container = document.getElementById('grid-thumbs');
-  container.querySelectorAll('.grid-thumb').forEach(function(el) {
-    el.addEventListener('dragstart', function(e) {
-      dragSrcIndex = parseInt(this.dataset.index);
-      e.dataTransfer.effectAllowed = 'move';
-      this.style.opacity = '0.4';
-    });
-    el.addEventListener('dragend', function() {
-      this.style.opacity = '';
-      container.querySelectorAll('.grid-thumb').forEach(function(t) {
-        t.classList.remove('drag-over');
-      });
-    });
-    el.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-    });
-    el.addEventListener('dragenter', function() {
-      this.classList.add('drag-over');
-    });
-    el.addEventListener('dragleave', function() {
-      this.classList.remove('drag-over');
-    });
-    el.addEventListener('drop', function(e) {
-      e.preventDefault();
-      var destIndex = parseInt(this.dataset.index);
-      if (dragSrcIndex === null || dragSrcIndex === destIndex) return;
-      var moved = gridImages.splice(dragSrcIndex, 1)[0];
-      gridImages.splice(destIndex, 0, moved);
-      renderGridThumbs();
-      updatePreview();
-    });
-  });
+function moveGridImage(index, dir) {
+  var target = index + dir;
+  if (target < 0 || target >= gridImages.length) return;
+  var tmp = gridImages[index];
+  gridImages[index] = gridImages[target];
+  gridImages[target] = tmp;
+  renderGridThumbs();
+  updatePreview();
 }
 
     function removeGridImage(index) {
