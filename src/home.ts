@@ -84,6 +84,10 @@ function photographerCard(p: Photographer, userRole?: string, savedIds?: Set<str
 export async function homePage(c: AppContext) {
   const search = c.req.query('search') ?? '';
   const university = c.req.query('university') ?? '';
+  const priceMinRaw = c.req.query('price_min') ?? '';
+  const priceMaxRaw = c.req.query('price_max') ?? '';
+  const filterPriceMin = priceMinRaw ? Math.max(0, parseInt(priceMinRaw)) : 0;
+  const filterPriceMax = priceMaxRaw ? Math.max(0, parseInt(priceMaxRaw)) : 0;
   const page = Math.max(1, parseInt(c.req.query('page') ?? '1'));
   const PAGE_SIZE = 24;
   const offset = (page - 1) * PAGE_SIZE;
@@ -102,7 +106,9 @@ export async function homePage(c: AppContext) {
     JOIN users u ON u.id = p.user_id
     WHERE (? = '' OR u.name LIKE '%' || ? || '%')
       AND (? = '' OR p.university = ?)
-  `).bind(search, search, university, university).first<{ total: number }>();
+      AND (? = 0 OR p.price_max IS NULL OR p.price_max >= ?)
+      AND (? = 0 OR p.price_min IS NULL OR p.price_min <= ?)
+  `).bind(search, search, university, university, filterPriceMin, filterPriceMin, filterPriceMax, filterPriceMax).first<{ total: number }>();
 
   const total = countRow?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
@@ -120,10 +126,12 @@ export async function homePage(c: AppContext) {
     LEFT JOIN ratings r ON r.photographer_id = p.user_id
     WHERE (? = '' OR u.name LIKE '%' || ? || '%')
       AND (? = '' OR p.university = ?)
+      AND (? = 0 OR p.price_max IS NULL OR p.price_max >= ?)
+      AND (? = 0 OR p.price_min IS NULL OR p.price_min <= ?)
     GROUP BY p.user_id
     ORDER BY ${biasOrderClause()}
     LIMIT ? OFFSET ?
-  `).bind(search, search, university, university, PAGE_SIZE, offset).all<Photographer>();
+  `).bind(search, search, university, university, filterPriceMin, filterPriceMin, filterPriceMax, filterPriceMax, PAGE_SIZE, offset).all<Photographer>();
 
   const universities = await c.env.unilens_db.prepare(`
     SELECT DISTINCT university FROM photographer_profiles WHERE university IS NOT NULL ORDER BY university
@@ -137,6 +145,8 @@ export async function homePage(c: AppContext) {
     const params = new URLSearchParams();
     if (search) params.set('search', search);
     if (university) params.set('university', university);
+    if (priceMinRaw) params.set('price_min', priceMinRaw);
+    if (priceMaxRaw) params.set('price_max', priceMaxRaw);
     if (p > 1) params.set('page', String(p));
     const q = params.toString();
     return q ? `/?${q}` : '/';
@@ -395,6 +405,31 @@ export async function homePage(c: AppContext) {
       color: #c9a84c;
       margin-top: 4px;
     }
+      .price-filter-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 2px solid var(--color-primary);
+      border-radius: var(--radius-full);
+      padding: 10px 16px;
+      background: white;
+    }
+    .price-input {
+      width: 72px;
+      border: none;
+      outline: none;
+      font-family: var(--font-sans);
+      font-size: 14px;
+      color: var(--color-text);
+      background: transparent;
+      -moz-appearance: textfield;
+    }
+    .price-input::-webkit-outer-spin-button,
+    .price-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .price-sep { font-size: 14px; color: var(--color-text-muted); }
+    @media (max-width: 480px) {
+      .price-filter-wrap { width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -402,49 +437,92 @@ export async function homePage(c: AppContext) {
 <div class="page-content">
   <h1 class="hero-title">Find your photographer</h1>
 
-  <form method="GET" action="/">
-    <div class="search-row">
-      <div class="search-box">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        <input type="text" name="search" placeholder="Search photographers..." value="${esc(search)}">
-      </div>
-      <div class="univ-filter" id="univ-filter">
-  <div class="univ-filter-trigger" onclick="toggleUnivFilter(event)">
-    <span class="univ-filter-icon">
-      ${currentFilterIcon ||
+  <div class="search-row">
+    <div class="search-box">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <input type="text" id="search-input" placeholder="Search photographers..." value="${esc(search)}" oninput="scheduleSearch()">
+    </div>
+    <div class="univ-filter" id="univ-filter">
+      <div class="univ-filter-trigger" onclick="toggleUnivFilter(event)">
+        <span class="univ-filter-icon">
+          ${currentFilterIcon ||
     `<svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>`
     }
-    </span>
-    <span class="univ-filter-label">${esc(university) || 'All universities'}</span>
-    <svg class="univ-filter-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
-      <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
-  </div>
-  <div class="univ-filter-options">
-    <div class="univ-filter-option${!university ? ' selected' : ''}" data-value="">All universities</div>
-    ${universityOptions}
-  </div>
-  <input type="hidden" name="university" id="univ-filter-value" value="${esc(university)}">
-</div>
-      <button type="submit" class="btn">Search</button>
+        </span>
+        <span class="univ-filter-label" id="univ-filter-label">${esc(university) || 'All universities'}</span>
+        <svg class="univ-filter-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="univ-filter-options">
+        <div class="univ-filter-option${!university ? ' selected' : ''}" data-value="">All universities</div>
+        ${universityOptions}
+      </div>
+      <input type="hidden" id="univ-filter-value" value="${esc(university)}">
     </div>
-  </form>
+    <div class="price-filter-wrap">
+      <input type="number" id="price-min-input" class="price-input" placeholder="Min $" min="0" value="${esc(priceMinRaw)}" oninput="scheduleSearch()">
+      <span class="price-sep">–</span>
+      <input type="number" id="price-max-input" class="price-input" placeholder="Max $" min="0" value="${esc(priceMaxRaw)}" oninput="scheduleSearch()">
+    </div>
+  </div>
 
   <p class="section-label">${total} photographer${total !== 1 ? 's' : ''} found</p>
   <div class="grid">${cards}</div>
   ${paginationHtml}
   </div>
   <script>
+  var searchTimer = null;
+
+  function scheduleSearch() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(doSearch, 350);
+  }
+
+  async function doSearch() {
+    var params = new URLSearchParams();
+    var s = document.getElementById('search-input').value;
+    var u = document.getElementById('univ-filter-value').value;
+    var pMin = document.getElementById('price-min-input').value;
+    var pMax = document.getElementById('price-max-input').value;
+    if (s) params.set('search', s);
+    if (u) params.set('university', u);
+    if (pMin) params.set('price_min', pMin);
+    if (pMax) params.set('price_max', pMax);
+    var qs = params.toString();
+    var url = qs ? '/?' + qs : '/';
+    history.pushState(null, '', url);
+    var res = await fetch(url, { headers: { 'X-Requested-With': 'fetch' } });
+    var html = await res.text();
+    var doc = new DOMParser().parseFromString(html, 'text/html');
+    document.querySelector('.grid').innerHTML = doc.querySelector('.grid').innerHTML;
+    document.querySelector('.section-label').textContent = doc.querySelector('.section-label').textContent;
+    var oldPag = document.querySelector('.pagination');
+    var newPag = doc.querySelector('.pagination');
+    if (oldPag) oldPag.remove();
+    if (newPag) {
+      var grid = document.querySelector('.grid');
+      grid.insertAdjacentElement('afterend', newPag.cloneNode(true));
+    }
+  }
+
   function toggleUnivFilter(e) {
     e.stopPropagation();
     document.getElementById('univ-filter').classList.toggle('open');
   }
 
-  document.querySelectorAll('.univ-filter-option').forEach(el => {
+  document.querySelectorAll('.univ-filter-option').forEach(function(el) {
     el.addEventListener('click', function(e) {
       e.stopPropagation();
-      document.getElementById('univ-filter-value').value = this.dataset.value;
-      this.closest('form').submit();
+      var val = this.dataset.value;
+      document.getElementById('univ-filter-value').value = val;
+      // Update trigger label and icon
+      document.getElementById('univ-filter-label').textContent = val || 'All universities';
+      document.querySelectorAll('.univ-filter-option').forEach(function(o) {
+        o.classList.toggle('selected', o.dataset.value === val);
+      });
+      document.getElementById('univ-filter').classList.remove('open');
+      doSearch();
     });
   });
 
@@ -464,7 +542,7 @@ export async function homePage(c: AppContext) {
     if (data.saved) savedIds.add(photographerId);
     else savedIds.delete(photographerId);
   }
-  document.addEventListener('click', () => {
+  document.addEventListener('click', function() {
     document.getElementById('univ-filter').classList.remove('open');
   });
 </script>

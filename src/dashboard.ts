@@ -532,14 +532,16 @@ export async function dashboardPage(c: AppContext) {
     }
     .grid-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .thumb-remove {
-      position: absolute; top: 3px; right: 3px;
-      width: 18px; height: 18px;
-      background: rgba(0,0,0,0.6); color: white;
-      border: none; border-radius: 50%;
-      font-size: 12px; line-height: 1;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      padding: 0;
-    }
+  position: absolute; top: 3px; right: 3px;
+  width: 18px; height: 18px;
+  background: rgba(0,0,0,0.6); color: white;
+  border: none; border-radius: 50%;
+  font-size: 12px; line-height: 1;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  padding: 0;
+}
+.grid-thumb { cursor: grab; }
+.grid-thumb.drag-over { outline: 2px solid var(--color-accent); outline-offset: 2px; }
     .grid-empty {
       font-size: 12px;
       color: var(--color-text-muted);
@@ -798,18 +800,57 @@ export async function dashboardPage(c: AppContext) {
     }
 
     function renderGridThumbs() {
-      var container = document.getElementById('grid-thumbs');
-      if (!gridImages.length) {
-        container.innerHTML = '<p class="grid-empty">No images yet \u2014 upload some above.</p>';
-        return;
-      }
-      container.innerHTML = gridImages.map(function(url, i) {
-        return '<div class="grid-thumb" id="thumb-' + i + '">' +
-          '<img src="' + url + '" alt="">' +
-          '<button class="thumb-remove" onclick="removeGridImage(' + i + ')">&times;</button>' +
-          '</div>';
-      }).join('');
-    }
+  var container = document.getElementById('grid-thumbs');
+  if (!gridImages.length) {
+    container.innerHTML = '<p class="grid-empty">No images yet \u2014 upload some above.</p>';
+    return;
+  }
+  container.innerHTML = gridImages.map(function(url, i) {
+    return '<div class="grid-thumb" id="thumb-' + i + '" draggable="true" data-index="' + i + '">' +
+      '<img src="' + url + '" alt="" draggable="false">' +
+      '<button class="thumb-remove" onclick="removeGridImage(' + i + ')">&times;</button>' +
+      '</div>';
+  }).join('');
+  initThumbDrag();
+}
+
+var dragSrcIndex = null;
+
+function initThumbDrag() {
+  var container = document.getElementById('grid-thumbs');
+  container.querySelectorAll('.grid-thumb').forEach(function(el) {
+    el.addEventListener('dragstart', function(e) {
+      dragSrcIndex = parseInt(this.dataset.index);
+      e.dataTransfer.effectAllowed = 'move';
+      this.style.opacity = '0.4';
+    });
+    el.addEventListener('dragend', function() {
+      this.style.opacity = '';
+      container.querySelectorAll('.grid-thumb').forEach(function(t) {
+        t.classList.remove('drag-over');
+      });
+    });
+    el.addEventListener('dragover', function(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    });
+    el.addEventListener('dragenter', function() {
+      this.classList.add('drag-over');
+    });
+    el.addEventListener('dragleave', function() {
+      this.classList.remove('drag-over');
+    });
+    el.addEventListener('drop', function(e) {
+      e.preventDefault();
+      var destIndex = parseInt(this.dataset.index);
+      if (dragSrcIndex === null || dragSrcIndex === destIndex) return;
+      var moved = gridImages.splice(dragSrcIndex, 1)[0];
+      gridImages.splice(destIndex, 0, moved);
+      renderGridThumbs();
+      updatePreview();
+    });
+  });
+}
 
     function removeGridImage(index) {
       gridImages.splice(index, 1);
