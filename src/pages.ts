@@ -241,7 +241,7 @@ export function aboutPage(c: AppContext) {
 <body>
   ${topbar('about', '')}
   <div class="page">
-    <h1 class="page-title">About UniLens (pre-α)</h1>
+    <h1 class="page-title">About UniLens (α)</h1>
     <p class="lead">Unilens is currently in the pre-α stage. Please note that this is a prototype and not all features may be fully functional. We're actively developing the platform and appreciate your understanding as we work towards a full launch. If you're interested in testing or providing feedback, please don't hesitate to reach out!</p>
     <p class="lead">UniLens connects college students with talented photographers on their campus. We make it easy to find someone who knows your school, your style, and your budget.</p>
 

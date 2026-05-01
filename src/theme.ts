@@ -113,7 +113,7 @@ export function topbar(
   <nav class="topbar">
     <a href="/" class="logo">
       ${logoSvg}
-      <span class="logo-title">UniLens (pre-α)</span>
+      <span class="logo-title">UniLens (α)</span>
     </a>
     <div class="topbar-right">
       ${isLoggedIn ? `

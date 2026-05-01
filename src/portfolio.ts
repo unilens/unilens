@@ -433,7 +433,7 @@ export async function getProfile(c: AppContext) {
   <div class="page-wrapper">
     <aside class="ad-column">
       ${tierConfig.ads ? `
-        <div class="ad-column-slot tall">Ad</div>
+        <div class="ad-column-slot tall">++</div>
       ` : ''}
     </aside>
     <div class="page-content">
