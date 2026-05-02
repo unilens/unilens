@@ -25,8 +25,8 @@ export async function dashboardPage(c: AppContext) {
 
   const tierConfig = TIERS[getTier(profile?.subscription_level ?? 'basic')];
   // Resolve the currently-selected university for server-side render
-  const currentUniv  = universities.find(u => u.name === profile?.university);
-  const currentIcon  = currentUniv?.svg ?? '';
+  const currentUniv = universities.find(u => u.name === profile?.university);
+  const currentIcon = currentUniv?.svg ?? '';
   const currentLabel = profile?.university ?? 'Select university...';
   const layoutMode = profile?.layout_mode ?? 'simple';
   const gridImages: string[] = JSON.parse(profile?.grid_images ?? '[]');
@@ -61,6 +61,25 @@ export async function dashboardPage(c: AppContext) {
 
     body { padding: 0; }
 
+
+    .plan-section {
+  padding: 12px 14px;
+  background: var(--color-hover);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+}
+.plan-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.plan-label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted); }
+.plan-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: var(--radius-full); }
+.plan-basic { background: #f0f0f0; color: #666; }
+.plan-plus  { background: #dbeafe; color: #1d4ed8; }
+.plan-pro   { background: #1a1a2e; color: #c9a84c; }
+.plan-meta  { font-size: 12px; color: var(--color-text-muted); margin-bottom: 8px; }
+.plan-upgrade-btn { font-size: 12px; font-weight: 500; color: var(--color-accent); text-decoration: none; }
+.plan-upgrade-btn:hover { text-decoration: underline; }
+.plan-manage-btn { background: none; border: none; font-family: var(--font-sans); font-size: 12px; font-weight: 500; color: var(--color-text-muted); cursor: pointer; padding: 0; }
+.plan-manage-btn:hover { color: var(--color-primary); }
     .dashboard {
       display: grid;
       grid-template-columns: 1fr 1px 1fr;
@@ -699,7 +718,18 @@ export async function dashboardPage(c: AppContext) {
         </div>
       </div>
 
-      <div class="bottom-bar">
+      <div class="plan-section">
+  <div class="plan-row">
+    <span class="plan-label">Your Plan</span>
+    <span class="plan-badge plan-${tierConfig.label.toLowerCase()}">${tierConfig.label}</span>
+  </div>
+  <p class="plan-meta">${tierConfig.photoLimit} photos · ${tierConfig.maxFileMb} MB uploads${tierConfig.ads ? ' · Ads on profile' : ' · No ads'}${tierConfig.proBadge ? ' · ⚡ Pro badge' : ''}</p>
+  ${(profile?.subscription_level ?? 'basic') !== 'basic'
+      ? `<button class="plan-manage-btn" onclick="manageSubscription()">Manage subscription ↗</button>`
+      : `<a href="/pricing" class="plan-upgrade-btn">Upgrade plan →</a>`}
+</div>
+
+<div class="bottom-bar">
         <button class="undo-btn" onclick="undo()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 00-4-4H4"/></svg>
           Undo
@@ -727,9 +757,9 @@ export async function dashboardPage(c: AppContext) {
           <div class="preview-meta">
             <span id="preview-university-icon" style="width:18px;height:18px;flex-shrink:0;display:flex;align-items:center;">
   ${profile?.university && getUniversitySvg(profile.university)
-    ? getUniversitySvg(profile.university).replace('<svg ', '<svg width="18" height="18" ')
-    : `<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>`
-  }
+      ? getUniversitySvg(profile.university).replace('<svg ', '<svg width="18" height="18" ')
+      : `<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-3.75-4-3.75z" stroke="currentColor" stroke-width="1.2" fill="none"/><circle cx="8" cy="5.5" r="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>`
+    }
 </span>
 <span id="preview-university">${profile?.university ?? 'University not set'}</span>
           </div>
@@ -754,6 +784,17 @@ export async function dashboardPage(c: AppContext) {
   <div class="toast" id="toast"></div>
 
   <script>
+    // Show upgrade success toast
+    if (new URLSearchParams(location.search).get('upgrade') === 'success') {
+      showToast('🎉 Plan upgraded successfully!');
+    }
+
+    async function manageSubscription() {
+      var res = await fetch('/stripe/portal', { method: 'POST' });
+      var data = await res.json();
+      if (res.ok && data.url) window.location.href = data.url;
+      else showToast('Error: ' + (data.error || 'Could not open billing portal'));
+    }
     var commissionOn = ${profile?.commission_open ? 'true' : 'false'};
     var undoStack = [];
     var avatarUrl = ${JSON.stringify(profile?.avatar_url ?? null)};

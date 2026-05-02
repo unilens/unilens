@@ -16,6 +16,9 @@ import { getNotifications, markNotificationsSeen } from './notifications';
 import { listImages, deleteImage } from './images';
 import { uploadImage, uploadAvatar } from './upload';
 import { csrfMiddleware } from './csrf';
+import { createCheckoutSession, stripeWebhook, createPortalSession } from './stripe';
+import { pricingPage } from './pricing';
+import { adminPage, adminLogin, adminSetTier, adminLogout } from './admin';
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
 app.use('*', csrfMiddleware);
@@ -46,7 +49,14 @@ app.post('/notifications/seen', requireAuth, markNotificationsSeen);
 app.get('/images', requireAuth, listImages);
 app.post('/images/delete', requireAuth, deleteImage);
 app.post('/upload/avatar', requireAuth, uploadAvatar);
-
+app.get('/pricing', softAuth, pricingPage);
+app.post('/stripe/checkout', requireAuth, createCheckoutSession);
+app.post('/stripe/webhook', stripeWebhook);   // no auth — verified by Stripe signature
+app.post('/stripe/portal',  requireAuth, createPortalSession);
+app.get('/admin',           adminPage);
+app.post('/admin/login',    adminLogin);
+app.post('/admin/set-tier', adminSetTier);
+app.get('/admin/logout',    adminLogout);
 
 // Protected routes
 app.get('/me', requireAuth, c => {

@@ -1,13 +1,20 @@
 
 export interface Env {
-  unilens_db:           D1Database;
-  SESSIONS:             KVNamespace;
-  unilens_images:       R2Bucket;
-  R2_PUBLIC_ID:         string;
-  GOOGLE_CLIENT_ID:     string;
-  GOOGLE_CLIENT_SECRET: string;
-  SESSION_SECRET:       string;
-  SEND_EMAIL: SendEmail; // in the Env interface
+  unilens_db:               D1Database;
+  SESSIONS:                 KVNamespace;
+  unilens_images:           R2Bucket;
+  R2_PUBLIC_ID:             string;
+  GOOGLE_CLIENT_ID:         string;
+  GOOGLE_CLIENT_SECRET:     string;
+  SESSION_SECRET:           string;
+  SEND_EMAIL:               SendEmail; // in the Env interface
+  STRIPE_SECRET_KEY:        string;
+  STRIPE_WEBHOOK_SECRET:    string;
+  STRIPE_PRICE_PLUS:        string;
+  STRIPE_PRICE_PRO:         string;
+  STRIPE_PRICE_PLUS_YEARLY: string;
+  STRIPE_PRICE_PRO_YEARLY:  string;
+  ADMIN_SECRET:             string;
 }
 
 export interface Variables {
@@ -15,19 +22,19 @@ export interface Variables {
 }
 
 export interface PhotographerProfile {
-  name:            string;
-  bio:             string;
-  portfolio_html:  string;
-  slug:            string;
-  price_min:       number;
-  price_max:       number;
-  commission_open: number;
-  avatar_url:      string | null;
-  university:      string;
-  avg_rating:      number;
-  review_count:    number;
-  user_id:         string;
-  layout_mode:     string;
-  grid_images:     string;
-  subscription_level: string;
+  name:                     string;
+  bio:                      string;
+  portfolio_html:           string;
+  slug:                     string;
+  price_min:                number;
+  price_max:                number;
+  commission_open:          number;
+  avatar_url:               string | null;
+  university:               string;
+  avg_rating:               number;
+  review_count:             number;
+  user_id:                  string;
+  layout_mode:              string;
+  grid_images:              string;
+  subscription_level:       string;
 }

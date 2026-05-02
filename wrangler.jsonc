@@ -26,7 +26,11 @@
 		}
 	],
 	"vars": {
-		"R2_PUBLIC_ID": "799589576e3c496eb6cb957b041dd0b8"
+		"R2_PUBLIC_ID": "799589576e3c496eb6cb957b041dd0b8",
+		"STRIPE_PRICE_PLUS":        "price_1TSl2GJ4nMD4IbQmjHwMJ56Y",
+		"STRIPE_PRICE_PRO":         "price_1TSl1OJ4nMD4IbQmWXXjtzmQ",
+		"STRIPE_PRICE_PLUS_YEARLY": "price_1TSl2WJ4nMD4IbQmZoFInuS1",
+		"STRIPE_PRICE_PRO_YEARLY":  "price_1TSl1oJ4nMD4IbQmaNzt3OXL"
 	},
 	"routes": [
   		{ "pattern": "unilens.net/*", "zone_name": "unilens.net" },
