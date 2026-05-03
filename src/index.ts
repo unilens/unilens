@@ -19,7 +19,7 @@ import { csrfMiddleware } from './csrf';
 import { createCheckoutSession, stripeWebhook, createPortalSession } from './stripe';
 import { pricingPage } from './pricing';
 import { adminPage, adminLogin, adminSetTier, adminLogout } from './admin';
-import { theme, favicon, topbarStyles, topbar } from './theme';
+import { theme, favicon, topbarStyles, topbar, logoSvg } from './theme';
 import { sitemapXml } from './sitemap';
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
@@ -63,6 +63,7 @@ app.post('/admin/set-tier', adminSetTier);
 app.get('/admin/logout',    adminLogout);
 app.get('/sitemap.xml', sitemapXml);
 app.get('/robots.txt', c => c.text(`User-agent: *\nAllow: /\nSitemap: https://unilens.net/sitemap.xml`));
+app.get('/favicon.svg', c => c.body(logoSvg, 200, { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'public, max-age=31536000' }));
 
 
 // Protected routes

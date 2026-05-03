@@ -1,7 +1,7 @@
 import { Context } from 'hono';
 import { Env, Variables, PhotographerProfile } from './types';
 import { sanitizePortfolio } from './sanitize';
-import { theme, favicon, topbarStyles, topbar } from './theme';
+import { theme, favicon, topbarStyles, topbar, ogTags } from './theme';
 import { getUniversitySvg } from './universities';
 import { TIERS, getTier } from './tiers';
 import { biasOrderClause } from './search-bias';
@@ -180,6 +180,7 @@ export async function getProfile(c: AppContext) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${esc(profile.name)} — UniLens</title>
+  ${ogTags({ title: `${esc(profile.name)} — UniLens`, description: profile.bio ?? 'View portfolio on UniLens.', image: profile.avatar_url ?? undefined })}
   ${favicon}
   <style>
     ${theme}
@@ -529,7 +530,7 @@ ${profile.university ?? 'University not set'}
     </div>
     <aside class="ad-column">
       ${tierConfig.ads ? `
-        <div class="ad-column-slot tall">++</div>
+        <div class="ad-column-slot tall">Ad</div>
       ` : ''}
     </aside>
   </div>
