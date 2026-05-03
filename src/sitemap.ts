@@ -7,6 +7,8 @@ const STATIC_PAGES = [
   { url: '/',        priority: '1.0', changefreq: 'daily' },
   { url: '/about',   priority: '0.4', changefreq: 'monthly' },
   { url: '/pricing', priority: '0.6', changefreq: 'monthly' },
+  { url: '/privacy', priority: '0.4', changefreq: 'monthly' },
+  { url: '/terms',   priority: '0.4', changefreq: 'monthly' },
 ];
 
 export async function sitemapXml(c: AppContext) {

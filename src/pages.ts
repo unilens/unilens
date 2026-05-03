@@ -150,6 +150,161 @@ export function registerPage(c: AppContext) {
   return c.html(html);
 }
 
+export function privacyPage(c: AppContext) {
+  return c.html(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — UniLens</title>
+  ${favicon}
+  <style>
+    ${theme}
+    ${topbarStyles}
+    body { padding: 0; }
+    .page { max-width: 720px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+    h1 { font-family: var(--font-serif); font-size: 38px; font-weight: 400; margin-bottom: 0.5rem; }
+    .updated { font-size: 13px; color: var(--color-text-muted); margin-bottom: 3rem; }
+    h2 { font-family: var(--font-serif); font-size: 20px; font-weight: 400; margin: 2rem 0 0.5rem; }
+    p, li { font-size: 15px; line-height: 1.8; color: var(--color-text-muted); margin-bottom: 0.75rem; }
+    ul { padding-left: 1.25rem; margin-bottom: 0.75rem; }
+    a { color: var(--color-accent); }
+    hr { border: none; border-top: 1px solid var(--color-border); margin: 2rem 0; }
+  </style>
+</head>
+<body>
+  ${topbar('', '')}
+  <div class="page">
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: May 2025</p>
+
+    <p>UniLens ("we", "us", or "our") operates unilens.net. This policy explains what information we collect, how we use it, and your rights.</p>
+
+    <h2>Information We Collect</h2>
+    <ul>
+      <li><strong>Account data:</strong> When you sign in with Google, we receive your name, email address, and Google account ID.</li>
+      <li><strong>Profile data:</strong> Photographers may provide a bio, university, price range, portfolio content, and a profile photo.</li>
+      <li><strong>Usage data:</strong> We may log request metadata (IP address, timestamps) for security and abuse prevention.</li>
+      <li><strong>Uploaded images:</strong> Photos you upload are stored in Cloudflare R2 and served publicly via a CDN URL.</li>
+      <li><strong>Inquiries and ratings:</strong> Messages sent between clients and photographers, and ratings you submit, are stored in our database.</li>
+    </ul>
+
+    <h2>How We Use Your Information</h2>
+    <ul>
+      <li>To provide and operate the UniLens platform.</li>
+      <li>To authenticate you and maintain your session.</li>
+      <li>To display your photographer profile to other users.</li>
+      <li>To send transactional emails (e.g. inquiry accepted/declined notifications).</li>
+      <li>To process subscription payments via Stripe.</li>
+      <li>To detect and prevent abuse.</li>
+    </ul>
+
+    <h2>Information Sharing</h2>
+    <p>We do not sell your personal data. We share data only with the third-party services necessary to operate UniLens:</p>
+    <ul>
+      <li><strong>Google OAuth</strong> — for authentication.</li>
+      <li><strong>Cloudflare</strong> — for hosting, edge computing, KV storage, R2 object storage, and email delivery.</li>
+      <li><strong>Stripe</strong> — for subscription billing. Stripe handles all payment data; we never store card numbers.</li>
+    </ul>
+    <p>Photographer profile information (name, bio, photos, university, pricing) is publicly visible to all visitors.</p>
+
+    <h2>Data Retention</h2>
+    <p>We retain your account and profile data for as long as your account is active. You may contact us to request deletion. Uploaded images can be deleted from your dashboard at any time.</p>
+
+    <h2>Cookies and Sessions</h2>
+    <p>We use a single HttpOnly session cookie to keep you logged in. We do not use third-party tracking cookies or advertising cookies.</p>
+
+    <h2>Security</h2>
+    <p>Sessions are stored server-side in Cloudflare KV. Cookies are marked HttpOnly, Secure, and SameSite=Lax. Stripe webhook payloads are verified by signature.</p>
+
+    <h2>Children</h2>
+    <p>UniLens is intended for college students (18+). We do not knowingly collect data from anyone under 13.</p>
+
+    <h2>Changes</h2>
+    <p>We may update this policy from time to time. Continued use of UniLens after changes constitutes acceptance.</p>
+
+    <h2>Contact</h2>
+    <p>Questions? Email us at <a href="mailto:support@unilens.net">support@unilens.net</a>.</p>
+  </div>
+</body>
+</html>`);
+}
+
+export function termsPage(c: AppContext) {
+  return c.html(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service — UniLens</title>
+  ${favicon}
+  <style>
+    ${theme}
+    ${topbarStyles}
+    body { padding: 0; }
+    .page { max-width: 720px; margin: 0 auto; padding: 3rem 1.5rem 6rem; }
+    h1 { font-family: var(--font-serif); font-size: 38px; font-weight: 400; margin-bottom: 0.5rem; }
+    .updated { font-size: 13px; color: var(--color-text-muted); margin-bottom: 3rem; }
+    h2 { font-family: var(--font-serif); font-size: 20px; font-weight: 400; margin: 2rem 0 0.5rem; }
+    p, li { font-size: 15px; line-height: 1.8; color: var(--color-text-muted); margin-bottom: 0.75rem; }
+    ul { padding-left: 1.25rem; margin-bottom: 0.75rem; }
+    a { color: var(--color-accent); }
+    hr { border: none; border-top: 1px solid var(--color-border); margin: 2rem 0; }
+  </style>
+</head>
+<body>
+  ${topbar('', '')}
+  <div class="page">
+    <h1>Terms of Service</h1>
+    <p class="updated">Last updated: May 2025</p>
+
+    <p>By using UniLens (unilens.net), you agree to these terms. If you do not agree, do not use the platform.</p>
+
+    <h2>1. Eligibility</h2>
+    <p>You must be at least 18 years old and a currently enrolled (or recently graduated) college student to use UniLens. By registering, you represent that this is true.</p>
+
+    <h2>2. Accounts</h2>
+    <p>You are responsible for maintaining the confidentiality of your account. You may not share your account or impersonate others. We may suspend or terminate accounts that violate these terms.</p>
+
+    <h2>3. Photographer Profiles</h2>
+    <p>Photographers are responsible for the accuracy of their profiles, including pricing, availability, and portfolio content. Portfolios must not contain illegal, hateful, sexually explicit, or infringing content. We reserve the right to remove any profile or content at our discretion.</p>
+
+    <h2>4. Client Conduct</h2>
+    <p>Clients must communicate respectfully. Ratings and reviews must be honest and based on genuine experience. Abuse of the inquiry or rating system may result in account termination.</p>
+
+    <h2>5. Payments and Subscriptions</h2>
+    <p>Paid plans (Plus, Pro) are billed through Stripe. Subscriptions renew automatically until cancelled. You may cancel at any time through the billing portal in your dashboard. Refunds are handled on a case-by-case basis — contact us at <a href="mailto:support@unilens.net">support@unilens.net</a>.</p>
+
+    <h2>6. Bookings and Transactions</h2>
+    <p>UniLens is a discovery and communication platform only. We are not a party to any agreement between photographers and clients. All booking arrangements, payments between users, and disputes are solely between the photographer and client.</p>
+
+    <h2>7. Intellectual Property</h2>
+    <p>You retain ownership of content you upload. By uploading, you grant UniLens a non-exclusive, royalty-free licence to store and display that content on the platform. You must only upload content you own or have rights to.</p>
+
+    <h2>8. Prohibited Use</h2>
+    <ul>
+      <li>Scraping, crawling, or automated access to the platform without permission.</li>
+      <li>Uploading malware, spam, or content that violates any law.</li>
+      <li>Circumventing rate limits, authentication, or other security measures.</li>
+      <li>Using UniLens to harass, defame, or harm other users.</li>
+    </ul>
+
+    <h2>9. Disclaimer</h2>
+    <p>UniLens is provided "as is" without warranties of any kind. We do not guarantee uptime, accuracy of user-submitted content, or outcomes of photographer-client engagements.</p>
+
+    <h2>10. Limitation of Liability</h2>
+    <p>To the fullest extent permitted by law, UniLens is not liable for indirect, incidental, or consequential damages arising from use of the platform.</p>
+
+    <h2>11. Changes</h2>
+    <p>We may update these terms at any time. Continued use of UniLens after changes constitutes acceptance of the updated terms.</p>
+
+    <h2>12. Contact</h2>
+    <p>Questions? Email <a href="mailto:support@unilens.net">support@unilens.net</a>.</p>
+  </div>
+</body>
+</html>`);
+}
+
 export function aboutPage(c: AppContext) {
   const html = `<!DOCTYPE html>
 <html lang="en">

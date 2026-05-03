@@ -4,7 +4,7 @@ import { googleLogin, googleCallback, completeRegistration, requireAuth, softAut
 import { savePortfolio, getProfile, getPhotographers } from './portfolio';
 import { ratePhotographer } from './ratings';
 import { homePage } from './home';
-import { loginPage, registerPage, aboutPage } from './pages';
+import { loginPage, registerPage, aboutPage, privacyPage, termsPage } from './pages';
 import { roleSelectPage } from './role';
 import { dashboardPage } from './dashboard';
 import { sendContactRequest, acceptContactRequest, declineContactRequest } from './contact';
@@ -22,7 +22,6 @@ import { adminPage, adminLogin, adminSetTier, adminLogout } from './admin';
 import { theme, favicon, topbarStyles, topbar } from './theme';
 import { sitemapXml } from './sitemap';
 
-
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
 app.use('*', csrfMiddleware);
 
@@ -36,6 +35,8 @@ app.get('/inquiries', requireAuth, inquiriesPage);
 app.get('/', softAuth, homePage);
 app.post('/save/:id', requireAuth, toggleSave);
 app.get('/about', aboutPage);
+app.get('/privacy', privacyPage);
+app.get('/terms', termsPage);
 app.get('/p/:slug', softAuth, getProfile);
 app.get('/photographers', getPhotographers);
 app.get('/login',    loginPage);

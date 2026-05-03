@@ -529,7 +529,7 @@ ${profile.university ?? 'University not set'}
     </div>
     <aside class="ad-column">
       ${tierConfig.ads ? `
-        <div class="ad-column-slot tall">Ad</div>
+        <div class="ad-column-slot tall">++</div>
       ` : ''}
     </aside>
   </div>
