@@ -1,7 +1,7 @@
 import { Context } from 'hono';
 import { Env, Variables, PhotographerProfile } from './types';
 import { sanitizePortfolio } from './sanitize';
-import { theme, favicon, topbarStyles, topbar, ogTags } from './theme';
+import { theme, favicon, topbarStyles, topbar, ogTags, adsenseScript } from './theme';
 import { getUniversitySvg } from './universities';
 import { TIERS, getTier } from './tiers';
 import { biasOrderClause } from './search-bias';
@@ -181,6 +181,7 @@ export async function getProfile(c: AppContext) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${esc(profile.name)} — UniLens</title>
   ${ogTags({ title: `${esc(profile.name)} — UniLens`, description: profile.bio ?? 'View portfolio on UniLens.', image: profile.avatar_url ?? undefined })}
+  ${tierConfig.ads ? adsenseScript('ca-pub-XXXXXXXXXXXXXXXXX') : ''}
   ${favicon}
   <style>
     ${theme}
@@ -434,7 +435,12 @@ export async function getProfile(c: AppContext) {
   <div class="page-wrapper">
     <aside class="ad-column">
       ${tierConfig.ads ? `
-        <div class="ad-column-slot tall">++</div>
+        <ins class="adsbygoogle ad-column-slot tall"
+          style="display:block;width:160px;height:600px;"
+          data-ad-client="ca-pub-8886855956034386"
+          data-ad-slot="XXXXXXXXXX"
+          data-ad-format="fixed"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
       ` : ''}
     </aside>
     <div class="page-content">
@@ -530,7 +536,12 @@ ${profile.university ?? 'University not set'}
     </div>
     <aside class="ad-column">
       ${tierConfig.ads ? `
-        <div class="ad-column-slot tall">Ad</div>
+        <ins class="adsbygoogle ad-column-slot tall"
+          style="display:block;width:160px;height:600px;"
+          data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
+          data-ad-slot="XXXXXXXXXX"
+          data-ad-format="fixed"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
       ` : ''}
     </aside>
   </div>

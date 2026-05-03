@@ -279,6 +279,9 @@ export function topbar(
   </nav>`;
 }
 
+export const adsenseScript = (clientId: string) =>
+  `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${clientId}" crossorigin="anonymous"></script>`;
+
 export function ogTags({ title, description, image }: {
   title: string; description: string; image?: string;
 }) {
