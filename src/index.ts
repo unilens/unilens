@@ -64,6 +64,7 @@ app.get('/admin/logout',    adminLogout);
 app.get('/sitemap.xml', sitemapXml);
 app.get('/robots.txt', c => c.text(`User-agent: *\nAllow: /\nSitemap: https://unilens.net/sitemap.xml`));
 app.get('/favicon.svg', c => c.body(logoSvg, 200, { 'Content-Type': 'image/svg+xml', 'Cache-Control': 'public, max-age=31536000' }));
+app.get('/ads.txt', c => c.text('google.com, pub-8886855956034386, DIRECT, f08c47fec0942fa0'));
 
 
 // Protected routes

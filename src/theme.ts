@@ -279,6 +279,8 @@ export function topbar(
   </nav>`;
 }
 
+export const adsenseMeta = `<meta name="google-adsense-account" content="ca-pub-8886855956034386">`;
+
 export const adsenseScript = (clientId: string) =>
   `<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${clientId}" crossorigin="anonymous"></script>`;
 

@@ -191,7 +191,7 @@ export async function getProfile(c: AppContext) {
 
     .page-wrapper {
       display: grid;
-      grid-template-columns: 160px 1fr 160px;
+      grid-template-columns: ${tierConfig.ads ? '160px 1fr 160px' : '1fr'};
       gap: 0;
       align-items: start;
       max-width: 1440px;
@@ -433,16 +433,16 @@ export async function getProfile(c: AppContext) {
   ${topbar('', String(user?.role ?? ''))}
 
   <div class="page-wrapper">
-    <aside class="ad-column">
-      ${tierConfig.ads ? `
+    ${tierConfig.ads ? `
+      <aside class="ad-column">
         <ins class="adsbygoogle ad-column-slot tall"
           style="display:block;width:160px;height:600px;"
           data-ad-client="ca-pub-8886855956034386"
           data-ad-slot="XXXXXXXXXX"
           data-ad-format="fixed"></ins>
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-      ` : ''}
-    </aside>
+      </aside>
+    ` : ''}
     <div class="page-content">
     <div class="profile-layout">
 
@@ -534,16 +534,16 @@ ${profile.university ?? 'University not set'}
 
     </div>
     </div>
-    <aside class="ad-column">
-      ${tierConfig.ads ? `
+    ${tierConfig.ads ? `
+      <aside class="ad-column">
         <ins class="adsbygoogle ad-column-slot tall"
           style="display:block;width:160px;height:600px;"
-          data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX"
+          data-ad-client="ca-pub-8886855956034386"
           data-ad-slot="XXXXXXXXXX"
           data-ad-format="fixed"></ins>
         <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-      ` : ''}
-    </aside>
+      </aside>
+    ` : ''}
   </div>
 ${userRole === 'client' ? `
   <script>
