@@ -213,6 +213,14 @@ export async function getProfile(c: AppContext) {
       top: 2rem;
     }
 
+    .mobile-ad-slot {
+      display: none;
+      margin: 1rem 0;
+    }
+    @media (max-width: 900px) {
+      .mobile-ad-slot { display: block; }
+    }
+
     .ad-column-slot {
       width: 100%;
       background: var(--color-hover);
@@ -526,7 +534,16 @@ ${profile.university ?? 'University not set'}
           <p id="rate-msg" style="font-size:12px;margin-top:8px;min-height:16px;"></p>
         </div>` : ''}
       </aside>
-
+    ${tierConfig.ads ? `
+    <div class="mobile-ad-slot">
+      <ins class="adsbygoogle"
+        style="display:block;width:100%;height:auto;"
+        data-ad-client="ca-pub-8886855956034386"
+        data-ad-slot="9472511000"
+        data-ad-format="auto"
+        data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>` : ''}
       <main>
   <p class="section-label">Portfolio</p>
   ${portfolioHtml}
