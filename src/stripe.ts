@@ -114,7 +114,9 @@ export async function createPortalSession(c: AppContext) {
     `SELECT stripe_customer_id FROM photographer_profiles WHERE user_id = ?`
   ).bind(user.id).first<{ stripe_customer_id: string | null }>();
 
-  if (!profile?.stripe_customer_id) return c.json({ error: 'No billing account found' }, 400);
+  if (!profile?.stripe_customer_id) {
+    return c.json({ admin_granted: true });
+  }
 
   const origin = new URL(c.req.url).origin;
   const session = await stripePost(c.env, '/billing_portal/sessions', {

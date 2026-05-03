@@ -19,6 +19,9 @@ import { csrfMiddleware } from './csrf';
 import { createCheckoutSession, stripeWebhook, createPortalSession } from './stripe';
 import { pricingPage } from './pricing';
 import { adminPage, adminLogin, adminSetTier, adminLogout } from './admin';
+import { theme, favicon, topbarStyles, topbar } from './theme';
+import { sitemapXml } from './sitemap';
+
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
 app.use('*', csrfMiddleware);
@@ -57,6 +60,9 @@ app.get('/admin',           adminPage);
 app.post('/admin/login',    adminLogin);
 app.post('/admin/set-tier', adminSetTier);
 app.get('/admin/logout',    adminLogout);
+app.get('/sitemap.xml', sitemapXml);
+app.get('/robots.txt', c => c.text(`User-agent: *\nAllow: /\nSitemap: https://unilens.net/sitemap.xml`));
+
 
 // Protected routes
 app.get('/me', requireAuth, c => {
@@ -75,6 +81,36 @@ app.post('/sanitize', requireAuth, async (c) => {
   return c.json({ html: sanitizePortfolio(html ?? '') });
 });
 
+
+app.notFound(c => c.html(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>404 — UniLens</title>
+  ${favicon}
+  <style>
+    ${theme}
+    ${topbarStyles}
+    body { padding: 0; }
+    .page { max-width: 480px; margin: 6rem auto; padding: 0 1.5rem; text-align: center; }
+    .code { font-family: var(--font-serif); font-size: 80px; font-weight: 400; color: var(--color-border); line-height: 1; margin-bottom: 1rem; }
+    .msg { font-size: 20px; font-weight: 400; font-family: var(--font-serif); margin-bottom: 0.5rem; }
+    .sub { font-size: 14px; color: var(--color-text-muted); margin-bottom: 2rem; }
+    .home-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 24px; background: var(--color-primary); color: white; border-radius: var(--radius-full); font-size: 14px; font-weight: 500; text-decoration: none; transition: opacity 0.15s; }
+    .home-btn:hover { opacity: 0.8; }
+  </style>
+</head>
+<body>
+  ${topbar('', '')}
+  <div class="page">
+    <div class="code">404</div>
+    <p class="msg">Page not found</p>
+    <p class="sub">The page you're looking for doesn't exist or has been moved.</p>
+    <a href="/" class="home-btn">Go home</a>
+  </div>
+</body>
+</html>`, 404));
 export default {
   fetch: app.fetch.bind(app),
   async email(message: ForwardableEmailMessage, env: Env, ctx: ExecutionContext) {

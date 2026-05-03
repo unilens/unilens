@@ -793,6 +793,7 @@ export async function dashboardPage(c: AppContext) {
       var res = await fetch('/stripe/portal', { method: 'POST' });
       var data = await res.json();
       if (res.ok && data.url) window.location.href = data.url;
+      else if (res.ok && data.admin_granted) showToast('Your plan was granted by an admin — no billing to manage.');
       else showToast('Error: ' + (data.error || 'Could not open billing portal'));
     }
     var commissionOn = ${profile?.commission_open ? 'true' : 'false'};
@@ -905,6 +906,7 @@ function moveGridImage(index, dir) {
     document.getElementById('price-min').addEventListener('input', updatePreview);
     document.getElementById('price-max').addEventListener('input', updatePreview);
     loadUploadedPhotos();
+    renderGridThumbs();
     document.getElementById('portfolio-html').addEventListener('input', function() {
       undoStack.push(this.value);
       if (undoStack.length > 50) undoStack.shift();
@@ -1038,6 +1040,7 @@ if (res.ok) {
       container.prepend(link);
       showToast('Image uploaded! Click URL to copy img tag.');
     } loadUploadedPhotos();
+      renderGridThumbs();
   } else {
     showToast('Upload failed: ' + data.error);
   }
