@@ -1,6 +1,6 @@
 import { Context } from 'hono';
 import { Env, Variables } from './types';
-import { theme, favicon, topbarStyles, topbar } from './theme';
+import { theme, favicon, topbarStyles, topbar, footer } from './theme';
 import { TIERS, getTier } from './tiers';
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
@@ -213,7 +213,8 @@ export async function pricingPage(c: AppContext) {
       }
     }
   </script>
-</body>
+${footer}
+  </body>
 </html>`;
 
   return c.html(html);

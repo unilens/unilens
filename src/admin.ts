@@ -1,6 +1,6 @@
 import { Context } from 'hono';
 import { Env, Variables } from './types';
-import { theme, favicon } from './theme';
+import { theme, favicon, footer } from './theme';
 import { getTier } from './tiers';
 import { esc } from './escape';
 
@@ -116,7 +116,8 @@ export async function adminPage(c: AppContext) {
       else showToast('Error: ' + (data.error || 'Failed'), false);
     }
   </script>
-</body>
+${footer}
+  </body>
 </html>`);
 }
 
@@ -163,7 +164,8 @@ function loginPageHtml() {
       }
     }
   </script>
-</body>
+${footer}
+  </body>
 </html>`;
 }
 

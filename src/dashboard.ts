@@ -1,6 +1,6 @@
 import { Context } from 'hono';
 import { Env, Variables } from './types';
-import { theme, favicon, topbarStyles, topbar } from './theme';
+import { theme, favicon, topbarStyles, topbar, footer } from './theme';
 import { universities, getUniversitySvg } from './universities';
 import { TIERS, getTier } from './tiers';
 import { esc } from './escape';
@@ -1157,7 +1157,8 @@ if (res.ok) {
       showToast(res.ok ? 'Profile saved!' : 'Error: ' + (data.error || 'Save failed'));
     }
   </script>
-</body>
+${footer}
+  </body>
 </html>`;
 
   return c.html(html);

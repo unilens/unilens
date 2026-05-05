@@ -1,6 +1,6 @@
 import { Context } from 'hono';
 import { Env, Variables } from './types';
-import { theme, favicon, topbarStyles, topbar } from './theme';
+import { theme, favicon, topbarStyles, topbar, footer } from './theme';
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
 
@@ -132,7 +132,8 @@ export function roleSelectPage(c: AppContext) {
       }
     }
   </script>
-</body>
+${footer}
+  </body>
 </html>`;
   return c.html(html);
 }

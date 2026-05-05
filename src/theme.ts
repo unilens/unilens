@@ -301,3 +301,10 @@ export function ogTags({ title, description, image }: {
 }
 
 export const favicon = `<link rel="icon" type="image/svg+xml" href="/favicon.svg">`;
+
+export const footer = `
+<footer style="border-top:1.5px solid var(--color-border);padding:1.5rem 2rem;display:flex;align-items:center;justify-content:center;gap:2rem;flex-wrap:wrap;font-size:13px;color:var(--color-text-muted);margin-top:auto;">
+  <a href="mailto:support@unilens.net" style="color:var(--color-text-muted);text-decoration:none;transition:color 0.15s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-muted)'">support@unilens.net</a>
+  <a href="/terms" style="color:var(--color-text-muted);text-decoration:none;transition:color 0.15s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-muted)'">Terms</a>
+  <a href="/privacy" style="color:var(--color-text-muted);text-decoration:none;transition:color 0.15s;" onmouseover="this.style.color='var(--color-accent)'" onmouseout="this.style.color='var(--color-text-muted)'">Privacy</a>
+</footer>`;

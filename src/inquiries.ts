@@ -1,6 +1,6 @@
 import { Context } from 'hono';
 import { Env, Variables } from './types';
-import { theme, favicon, topbarStyles, topbar } from './theme';
+import { theme, favicon, topbarStyles, topbar, footer } from './theme';
 import { esc } from './escape';
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
@@ -182,6 +182,7 @@ function page(nav: string, body: string, script: string) {
   ${nav}
   <div class="page">${body}</div>
   ${script ? `<script>${script}</script>` : ''}
-</body>
+${footer}
+  </body>
 </html>`;
 }

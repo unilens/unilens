@@ -1,6 +1,6 @@
 import { Context } from 'hono';
 import { Env, Variables } from './types';
-import { theme, favicon, topbarStyles, topbar } from './theme';
+import { theme, favicon, topbarStyles, topbar, footer } from './theme';
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
 
@@ -72,7 +72,8 @@ export function loginPage(c: AppContext) {
     </a>
     <p class="alt-link">Don't have an account? <a href="/register">Sign up</a></p>
   </div>
-</body>
+${footer}
+  </body>
 </html>`;
   return c.html(html);
 }
@@ -145,7 +146,8 @@ export function registerPage(c: AppContext) {
     </a>
     <p class="alt-link">Already have an account? <a href="/login">Log in</a></p>
   </div>
-</body>
+${footer}
+  </body>
 </html>`;
   return c.html(html);
 }
@@ -226,7 +228,8 @@ export function privacyPage(c: AppContext) {
     <h2>Contact</h2>
     <p>Questions? Email us at <a href="mailto:support@unilens.net">support@unilens.net</a>.</p>
   </div>
-</body>
+${footer}
+  </body>
 </html>`);
 }
 
@@ -301,7 +304,8 @@ export function termsPage(c: AppContext) {
     <h2>12. Contact</h2>
     <p>Questions? Email <a href="mailto:support@unilens.net">support@unilens.net</a>.</p>
   </div>
-</body>
+${footer}
+  </body>
 </html>`);
 }
 
@@ -449,7 +453,8 @@ export function aboutPage(c: AppContext) {
       <a href="/register" class="cta">Join UniLens</a>
     </div>
   </div>
-</body>
+${footer}
+  </body>
 </html>`;
   return c.html(html);
 }

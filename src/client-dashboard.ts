@@ -1,6 +1,6 @@
 import { Context } from 'hono';
 import { Env, Variables } from './types';
-import { theme, favicon, topbarStyles, topbar } from './theme';
+import { theme, favicon, topbarStyles, topbar, footer } from './theme';
 import { getUniversitySvg } from './universities';
 import { esc } from './escape';
 
@@ -270,7 +270,8 @@ export async function clientDashboardPage(c: AppContext) {
       Browse all photographers
     </a>
   </div>
-</body>
+${footer}
+  </body>
 </html>`;
 
   return c.html(html);

@@ -1,7 +1,7 @@
 import { Context } from 'hono';
 import { Env, Variables, PhotographerProfile } from './types';
 import { sanitizePortfolio } from './sanitize';
-import { theme, favicon, topbarStyles, topbar, ogTags, adsenseScript } from './theme';
+import { theme, favicon, topbarStyles, topbar, ogTags, adsenseScript, footer } from './theme';
 import { getUniversitySvg } from './universities';
 import { TIERS, getTier } from './tiers';
 import { biasOrderClause } from './search-bias';
@@ -155,19 +155,21 @@ export async function getProfile(c: AppContext) {
 
   // Portfolio area
   const portfolioHtml = isLoggedIn
-    ? `<div class="custom-area">
-       <iframe srcdoc="${profile.portfolio_html.replace(/"/g, '&quot;')}"
-         sandbox="" title="${esc(profile.name)}'s portfolio"></iframe>
-     </div>`
+    ? `<div class="custom-area" id="portfolio-host"></div>
+     <script>
+       (function(){
+         var host = document.getElementById('portfolio-host');
+         var shadow = host.attachShadow({mode:'open'});
+         shadow.innerHTML = ${JSON.stringify(profile.portfolio_html)};
+       })();
+     </script>`
     : `<div class="portfolio-locked-wrap">
-       <div class="custom-area locked-content">
-         <iframe srcdoc="<html><body style='font-family:sans-serif;padding:40px;'>
-           <div style='display:grid;grid-template-columns:1fr 1fr;gap:16px;'>
-             <div style='background:#eee;height:200px;border-radius:8px;'></div>
-             <div style='background:#ddd;height:200px;border-radius:8px;'></div>
-             <div style='background:#e8e8e8;height:200px;border-radius:8px;'></div>
-             <div style='background:#d8d8d8;height:200px;border-radius:8px;'></div>
-           </div>
+       <div class="custom-area locked-content" style="min-height:420px;display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px;">
+         <div style='background:#eee;height:200px;border-radius:8px;'></div>
+         <div style='background:#ddd;height:200px;border-radius:8px;'></div>
+         <div style='background:#e8e8e8;height:200px;border-radius:8px;'></div>
+         <div style='background:#d8d8d8;height:200px;border-radius:8px;'></div>
+       </div>
          </body></html>"
            sandbox="" title="Locked portfolio"></iframe>
        </div>
@@ -370,16 +372,8 @@ export async function getProfile(c: AppContext) {
     .custom-area {
       border: 2.5px solid var(--color-primary);
       border-radius: var(--radius-sm);
-      min-height: 600px;
       overflow: hidden;
-    }
-
-    .custom-area iframe {
-      width: 100%;
-      min-height: 600px;
-      border: none;
-      display: block;
-      isolation: isolate;
+      padding: 0;
     }
 
     .locked-wrap {
@@ -616,7 +610,8 @@ ${userRole === 'client' ? `
       window.toggleSave = toggleSave;
     })();
   </script>` : ''}
-</body>
+${footer}
+  </body>
 </html>`;
 
   return c.html(html);

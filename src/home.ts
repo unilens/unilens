@@ -1,6 +1,6 @@
 import { Context } from 'hono';
 import { Env, Variables } from './types';
-import { theme, favicon, topbarStyles, topbar, ogTags, adsenseMeta } from './theme';
+import { theme, favicon, topbarStyles, topbar, ogTags, adsenseMeta, footer } from './theme';
 import { getUniversitySvg } from './universities';
 import { TIERS, getTier } from './tiers';
 import { biasOrderClause } from './search-bias';
@@ -548,6 +548,7 @@ export async function homePage(c: AppContext) {
     document.getElementById('univ-filter').classList.remove('open');
   });
 </script>
+${footer}
 </body>
 </html>`;
 

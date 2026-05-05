@@ -19,7 +19,7 @@ import { csrfMiddleware } from './csrf';
 import { createCheckoutSession, stripeWebhook, createPortalSession } from './stripe';
 import { pricingPage } from './pricing';
 import { adminPage, adminLogin, adminSetTier, adminLogout } from './admin';
-import { theme, favicon, topbarStyles, topbar, logoSvg } from './theme';
+import { theme, favicon, topbarStyles, topbar, logoSvg, footer } from './theme';
 import { sitemapXml } from './sitemap';
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
@@ -112,7 +112,8 @@ app.notFound(c => c.html(`<!DOCTYPE html>
     <p class="sub">The page you're looking for doesn't exist or has been moved.</p>
     <a href="/" class="home-btn">Go home</a>
   </div>
-</body>
+${footer}
+  </body>
 </html>`, 404));
 export default {
   fetch: app.fetch.bind(app),
