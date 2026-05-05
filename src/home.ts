@@ -45,7 +45,7 @@ function avatar(p: Photographer): string {
 function photographerCard(p: Photographer, userRole?: string, savedIds?: Set<string>): string {
   const isLoggedIn = userRole === 'photographer' || userRole === 'client';
   const isSaved = savedIds?.has(p.user_id) ?? false;
-  const saveBtn = `
+  const saveBtn = userRole === 'photographer' ? '' : `
     <button class="save-btn" data-id="${p.user_id}" onclick="toggleSave(event,'${p.user_id}')" title="${isSaved ? 'Unsave' : 'Save'}">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="${isSaved ? '#e2a800' : 'white'}" stroke="#111" stroke-width="1.5" stroke-linejoin="round">
         <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>

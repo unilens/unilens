@@ -154,15 +154,22 @@ export async function getProfile(c: AppContext) {
      </div>`;
 
   // Portfolio area
+  const resizeScript = `<scr` + `ipt>function r(){parent.postMessage(document.documentElement.scrollHeight,'*')}new ResizeObserver(r).observe(document.documentElement);r()<\/scr` + `ipt>`;
+
   const portfolioHtml = isLoggedIn
-    ? `<div class="custom-area" id="portfolio-host"></div>
-     <script>
-       (function(){
-         var host = document.getElementById('portfolio-host');
-         var shadow = host.attachShadow({mode:'open'});
-         shadow.innerHTML = ${JSON.stringify(profile.portfolio_html)};
-       })();
-     </script>`
+      ? `<div class="custom-area">
+        <iframe id="portfolio-frame"
+          srcdoc="${(profile.portfolio_html + resizeScript).replace(/"/g, '&quot;')}"
+          sandbox="allow-scripts"
+          title="${esc(profile.name)}'s portfolio"
+          style="width:100%;border:none;display:block;height:200px;"></iframe>
+      </div>
+      <script>
+        window.addEventListener('message', function(e) {
+          var f = document.getElementById('portfolio-frame');
+          if (f && typeof e.data === 'number' && e.data > 0) f.style.height = e.data + 'px';
+        });
+      </script>`
     : `<div class="portfolio-locked-wrap">
        <div class="custom-area locked-content" style="min-height:420px;display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px;">
          <div style='background:#eee;height:200px;border-radius:8px;'></div>

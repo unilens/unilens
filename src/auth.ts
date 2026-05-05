@@ -23,7 +23,7 @@ export function googleLogin(c: AppContext) {
 // ---- STEP 2: Handle Google callback ----
 export async function googleCallback(c: AppContext) {
   const code = c.req.query('code');
-  if (!code) return c.json({ error: 'Missing code' }, 400);
+  if (!code) return c.redirect('/');
 
   const origin = new URL(c.req.url).origin;
 
