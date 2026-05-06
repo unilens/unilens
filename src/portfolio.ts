@@ -170,15 +170,12 @@ export async function getProfile(c: AppContext) {
           if (f && typeof e.data === 'number' && e.data > 0) f.style.height = e.data + 'px';
         });
       </script>`
-    : `<div class="portfolio-locked-wrap">
+        : `<div class="portfolio-locked-wrap">
        <div class="custom-area locked-content" style="min-height:420px;display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:20px;">
-         <div style='background:#eee;height:200px;border-radius:8px;'></div>
-         <div style='background:#ddd;height:200px;border-radius:8px;'></div>
-         <div style='background:#e8e8e8;height:200px;border-radius:8px;'></div>
-         <div style='background:#d8d8d8;height:200px;border-radius:8px;'></div>
-       </div>
-         </body></html>"
-           sandbox="" title="Locked portfolio"></iframe>
+         <div style="background:#eee;border-radius:8px;"></div>
+         <div style="background:#ddd;border-radius:8px;"></div>
+         <div style="background:#e8e8e8;border-radius:8px;"></div>
+         <div style="background:#d8d8d8;border-radius:8px;"></div>
        </div>
        <div class="locked-overlay"><a href="/login">Log in to view portfolio</a></div>
      </div>`;
