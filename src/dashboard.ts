@@ -20,7 +20,7 @@ export async function dashboardPage(c: AppContext) {
     bio: string; portfolio_html: string; slug: string;
     price_min: number; price_max: number; commission_open: number;
     avatar_url: string; university: string; subscription_level: string;
-    layout_mode: string; grid_images: string;
+    layout_mode: string; grid_images: string; also_serves: string;
   }>();
 
   const tierConfig = TIERS[getTier(profile?.subscription_level ?? 'basic')];
@@ -30,6 +30,8 @@ export async function dashboardPage(c: AppContext) {
   const currentLabel = profile?.university ?? 'Select university...';
   const layoutMode = profile?.layout_mode ?? 'simple';
   const gridImages: string[] = JSON.parse(profile?.grid_images ?? '[]');
+  const alsoServesInit: string[] = JSON.parse(profile?.also_serves ?? '[]');
+  const alsoServesLimit = tierConfig.alsoServesLimit;
   const gridThumbsHtml = gridImages.map((url, i) => `
     <div class="grid-thumb" id="thumb-${i}">
       <img src="${url}" alt="">
@@ -48,6 +50,15 @@ export async function dashboardPage(c: AppContext) {
       </div>`;
   }).join('');
 
+  function alsoServesTagHtml(name: string) {
+    const svg = getUniversitySvg(name);
+    return `<span class="also-tag" data-name="${esc(name)}" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border:1.5px solid var(--color-border);border-radius:var(--radius-full);background:white;">
+      ${svg ? svg.replace('<svg ', '<svg width="14" height="14" ') : ''}
+      ${esc(name)}
+      <button onclick="removeAlsoServes('${esc(name)}')" style="background:none;border:none;cursor:pointer;padding:0;font-size:14px;line-height:1;color:var(--color-text-muted);">×</button>
+    </span>`;
+  }
+  
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -600,17 +611,21 @@ export async function dashboardPage(c: AppContext) {
       padding: 3px;
     }
     .upload-gallery-item:hover .upload-gallery-actions { opacity: 1; }
-    .gal-btn {
-      flex: 1; background: rgba(255,255,255,0.15); border: none;
-      color: white; font-size: 10px; cursor: pointer;
-      border-radius: 3px; padding: 3px 0;
-      font-family: var(--font-sans); font-weight: 500;
-      transition: background 0.1s;
-    }
-    .gal-btn:hover { background: rgba(255,255,255,0.3); }
-    .gal-btn.del { color: #ff9090; }
-    .gal-btn.del:hover { background: rgba(180,0,0,0.4); color: white; }
-  </style>
+      .gal-btn {
+        flex: 1; background: rgba(255,255,255,0.15); border: none;
+        color: white; font-size: 10px; cursor: pointer;
+        border-radius: 3px; padding: 3px 0;
+        font-family: var(--font-sans); font-weight: 500;
+        transition: background 0.1s;
+      }
+      .gal-btn:hover { background: rgba(255,255,255,0.3); }
+      .gal-btn.del { color: #ff9090; }
+      .gal-btn.del:hover { background: rgba(180,0,0,0.4); color: white; }
+  
+      .univ-search-wrap { padding: 6px 8px; border-bottom: 1px solid var(--color-border); }
+      .univ-search-input { width: 100%; border: 1.5px solid var(--color-border); border-radius: var(--radius-sm); padding: 5px 8px; font-family: var(--font-sans); font-size: 12px; outline: none; }
+      .univ-search-input:focus { border-color: var(--color-primary); }
+    </style>
 </head>
 <body>
   ${topbar('dashboard', String(user?.role ?? ''))}
@@ -643,8 +658,7 @@ export async function dashboardPage(c: AppContext) {
 
       <div class="fields-grid">
         <div class="form-group">
-          <label>University</label>
-          <!-- Custom university dropdown -->
+          <label>Home University</label>
           <div class="univ-select" id="univ-select">
             <div class="univ-trigger" id="univ-trigger" onclick="toggleUnivDropdown(event)">
               <span class="univ-trigger-icon" id="univ-trigger-icon">${currentIcon}</span>
@@ -654,11 +668,33 @@ export async function dashboardPage(c: AppContext) {
               </svg>
             </div>
             <div class="univ-options" id="univ-options">
+              <div class="univ-search-wrap"><input class="univ-search-input" id="univ-search" type="text" placeholder="Search..." oninput="filterUnivOptions('univ-options','univ-search')" onclick="event.stopPropagation()"></div>
+              <div class="univ-option${!profile?.university ? ' selected' : ''}" data-name="">
+                <span class="univ-opt-icon"></span><span>None</span>
+              </div>
               ${univOptions}
             </div>
           </div>
-          <!-- Hidden input keeps the same id so saveProfile() is unchanged -->
           <input type="hidden" id="university" value="${profile?.university ?? ''}">
+        </div>
+        <div class="form-group full" id="also-serves-group" style="grid-column:1/-1;">
+          <label>Also serves <span id="also-serves-count-label" style="font-weight:400;color:var(--color-text-muted);font-size:11px;">(${alsoServesInit.length}/${alsoServesLimit} additional)</span></label>
+          ${alsoServesLimit === 0 ? `<p style="font-size:12px;color:var(--color-text-muted);">Upgrade to Plus or Pro to add additional universities.</p>` : `
+          <div class="univ-select" id="also-serves-select">
+            <div class="univ-trigger" id="also-serves-trigger" onclick="toggleAlsoServesDropdown(event)">
+              <span class="univ-trigger-icon"></span>
+              <span class="univ-trigger-label placeholder" id="also-serves-trigger-label">Add a university...</span>
+              <svg class="univ-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="univ-options" id="also-serves-options">
+              <div class="univ-search-wrap"><input class="univ-search-input" id="also-serves-search" type="text" placeholder="Search..." oninput="filterUnivOptions('also-serves-options','also-serves-search')" onclick="event.stopPropagation()"></div>
+              ${univOptions}
+            </div>
+          </div>
+          <div id="also-serves-tags" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;">${alsoServesInit.map((u: string) => alsoServesTagHtml(u)).join('')}</div>
+          `}
         </div>
         <div class="form-group">
           <label>Bio</label>
@@ -802,36 +838,125 @@ export async function dashboardPage(c: AppContext) {
     var currentLayout = '${layoutMode}';
     var gridImages = ${JSON.stringify(gridImages)};
 
+    // ── Shared university dropdown helpers ──
+    function filterUnivOptions(optionsId, searchId) {
+      var q = document.getElementById(searchId).value.toLowerCase();
+      document.querySelectorAll('#' + optionsId + ' .univ-option').forEach(function(el) {
+        var name = (el.dataset.name || '').toLowerCase();
+        el.style.display = (!q || name.includes(q)) ? '' : 'none';
+      });
+    }
+
     function toggleUnivDropdown(e) {
       e.stopPropagation();
-      document.getElementById('univ-select').classList.toggle('open');
+      var sel = document.getElementById('univ-select');
+      var wasOpen = sel.classList.contains('open');
+      closeAllUnivDropdowns();
+      if (!wasOpen) {
+        sel.classList.add('open');
+        document.getElementById('univ-search').value = '';
+        filterUnivOptions('univ-options', 'univ-search');
+        document.getElementById('univ-search').focus();
+      }
     }
 
-    function selectUniversity(name, iconHtml) {
-      document.getElementById('university').value = name;
-      document.getElementById('univ-trigger-icon').innerHTML = iconHtml;
-      var lbl = document.getElementById('univ-trigger-label');
-      lbl.textContent = name;
-      lbl.classList.remove('placeholder');
-      document.querySelectorAll('.univ-option').forEach(function(el) {
-        el.classList.toggle('selected', el.dataset.name === name);
-      });
+    function toggleAlsoServesDropdown(e) {
+      e.stopPropagation();
+      var sel = document.getElementById('also-serves-select');
+      if (!sel) return;
+      var wasOpen = sel.classList.contains('open');
+      closeAllUnivDropdowns();
+      if (!wasOpen) {
+        sel.classList.add('open');
+        document.getElementById('also-serves-search').value = '';
+        filterUnivOptions('also-serves-options', 'also-serves-search');
+        document.getElementById('also-serves-search').focus();
+      }
+    }
+
+    function closeAllUnivDropdowns() {
       document.getElementById('univ-select').classList.remove('open');
-      updatePreview();
-      document.getElementById('preview-university-icon').innerHTML =
-        iconHtml.replace('<svg ', '<svg width="18" height="18" ');
+      var as = document.getElementById('also-serves-select');
+      if (as) as.classList.remove('open');
     }
 
-    document.querySelectorAll('.univ-option').forEach(function(el) {
+    document.addEventListener('click', closeAllUnivDropdowns);
+
+    // Home university selection
+    document.querySelectorAll('#univ-options .univ-option').forEach(function(el) {
       el.addEventListener('click', function(e) {
         e.stopPropagation();
-        selectUniversity(this.dataset.name, this.querySelector('.univ-opt-icon').innerHTML);
+        var name = this.dataset.name;
+        var iconHtml = this.querySelector('.univ-opt-icon').innerHTML;
+        document.getElementById('university').value = name;
+        document.getElementById('univ-trigger-icon').innerHTML = iconHtml;
+        var lbl = document.getElementById('univ-trigger-label');
+        lbl.textContent = name || 'None';
+        lbl.classList.toggle('placeholder', !name);
+        document.querySelectorAll('#univ-options .univ-option').forEach(function(o) {
+          o.classList.toggle('selected', o.dataset.name === name);
+        });
+        document.getElementById('univ-select').classList.remove('open');
+        document.getElementById('preview-university').textContent = name || 'University not set';
+        document.getElementById('preview-university-icon').innerHTML =
+          name ? iconHtml.replace('<svg ', '<svg width="18" height="18" ') : '';
+        updatePreview();
       });
     });
 
-    document.addEventListener('click', function() {
-      document.getElementById('univ-select').classList.remove('open');
+    // Also serves
+    var alsoServes = ${JSON.stringify(alsoServesInit)};
+    var alsoServesLimit = ${alsoServesLimit};
+
+    function renderAlsoServesTags() {
+      var container = document.getElementById('also-serves-tags');
+      if (!container) return;
+      container.innerHTML = alsoServes.map(function(name) {
+        var opt = document.querySelector('#also-serves-options .univ-option[data-name="' + name.replace(/"/g, '&quot;') + '"]');
+        var iconHtml = opt ? opt.querySelector('.univ-opt-icon').innerHTML : '';
+        return '<span class="also-tag" data-name="' + name.replace(/"/g, '&quot;') + '" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border:1.5px solid var(--color-border);border-radius:var(--radius-full);background:white;">' +
+          iconHtml.replace('<svg ', '<svg width="14" height="14" ') +
+          name +
+          '<button onclick="removeAlsoServes(\'' + name.replace(/'/g, "\\'") + '\')" style="background:none;border:none;cursor:pointer;padding:0;font-size:14px;line-height:1;color:var(--color-text-muted);">\xd7</button>' +
+          '</span>';
+      }).join('');
+      var lbl = document.getElementById('also-serves-count-label');
+      if (lbl) lbl.textContent = '(' + alsoServes.length + '/' + alsoServesLimit + ' additional)';
+    }
+
+    function removeAlsoServes(name) {
+      alsoServes = alsoServes.filter(function(u) { return u !== name; });
+      renderAlsoServesTags();
+      updateAlsoServesOptions();
+    }
+
+    function updateAlsoServesOptions() {
+      var homeUniv = document.getElementById('university').value;
+      document.querySelectorAll('#also-serves-options .univ-option').forEach(function(el) {
+        var name = el.dataset.name;
+        var taken = alsoServes.includes(name) || name === homeUniv || !name;
+        el.style.opacity = taken ? '0.35' : '';
+        el.style.pointerEvents = taken ? 'none' : '';
+      });
+    }
+
+    document.querySelectorAll('#also-serves-options .univ-option').forEach(function(el) {
+      el.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var name = this.dataset.name;
+        if (!name || alsoServes.includes(name)) return;
+        if (alsoServes.length >= alsoServesLimit) {
+          showToast('Limit reached: ' + alsoServesLimit + ' additional universities on your plan');
+          return;
+        }
+        alsoServes.push(name);
+        renderAlsoServesTags();
+        updateAlsoServesOptions();
+        document.getElementById('also-serves-select').classList.remove('open');
+      });
     });
+
+    updateAlsoServesOptions();
 
     function setLayout(mode) {
       currentLayout = mode;
@@ -1143,6 +1268,7 @@ if (res.ok) {
         portfolio_html:  portfolioHtml,
         layout_mode:     currentLayout,
         grid_images:     JSON.stringify(gridImages),
+        also_serves:     alsoServes,
       };
 
       var res = await fetch('/portfolio', {

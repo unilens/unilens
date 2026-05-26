@@ -105,10 +105,10 @@ export async function homePage(c: AppContext) {
     FROM photographer_profiles p
     JOIN users u ON u.id = p.user_id
     WHERE (? = '' OR u.name LIKE '%' || ? || '%')
-      AND (? = '' OR p.university = ?)
+      AND (? = '' OR p.university = ? OR (? != '' AND p.also_serves LIKE '%"' || ? || '"%'))
       AND (? = 0 OR p.price_max IS NULL OR p.price_max >= ?)
       AND (? = 0 OR p.price_min IS NULL OR p.price_min <= ?)
-  `).bind(search, search, university, university, filterPriceMin, filterPriceMin, filterPriceMax, filterPriceMax).first<{ total: number }>();
+  `).bind(search, search, university, university, university, university, filterPriceMin, filterPriceMin, filterPriceMax, filterPriceMax).first<{ total: number }>();
 
   const total = countRow?.total ?? 0;
   const totalPages = Math.ceil(total / PAGE_SIZE);
@@ -125,13 +125,13 @@ export async function homePage(c: AppContext) {
     JOIN users u ON u.id = p.user_id
     LEFT JOIN ratings r ON r.photographer_id = p.user_id
     WHERE (? = '' OR u.name LIKE '%' || ? || '%')
-      AND (? = '' OR p.university = ?)
+      AND (? = '' OR p.university = ? OR (? != '' AND p.also_serves LIKE '%"' || ? || '"%'))
       AND (? = 0 OR p.price_max IS NULL OR p.price_max >= ?)
       AND (? = 0 OR p.price_min IS NULL OR p.price_min <= ?)
     GROUP BY p.user_id
     ORDER BY ${biasOrderClause()}
     LIMIT ? OFFSET ?
-  `).bind(search, search, university, university, filterPriceMin, filterPriceMin, filterPriceMax, filterPriceMax, PAGE_SIZE, offset).all<Photographer>();
+  `).bind(search, search, university, university, university, university, filterPriceMin, filterPriceMin, filterPriceMax, filterPriceMax, PAGE_SIZE, offset).all<Photographer>();
 
   const universities = await c.env.unilens_db.prepare(`
     SELECT DISTINCT university FROM photographer_profiles WHERE university IS NOT NULL ORDER BY university
@@ -457,6 +457,11 @@ export async function homePage(c: AppContext) {
         </svg>
       </div>
       <div class="univ-filter-options">
+        <div style="padding:6px 8px;border-bottom:1px solid var(--color-border);">
+          <input id="univ-filter-search" type="text" placeholder="Search..." onclick="event.stopPropagation()"
+            oninput="filterHomeUnivOptions(this.value)"
+            style="width:100%;border:1.5px solid var(--color-border);border-radius:var(--radius-sm);padding:5px 8px;font-family:var(--font-sans);font-size:12px;outline:none;">
+        </div>
         <div class="univ-filter-option${!university ? ' selected' : ''}" data-value="">All universities</div>
         ${universityOptions}
       </div>
@@ -508,9 +513,22 @@ export async function homePage(c: AppContext) {
     }
   }
 
+  function filterHomeUnivOptions(q) {
+    q = q.toLowerCase();
+    document.querySelectorAll('.univ-filter-option').forEach(function(el) {
+      var val = (el.dataset.value || '').toLowerCase();
+      el.style.display = (!q || val === '' || val.includes(q)) ? '' : 'none';
+    });
+  }
+
   function toggleUnivFilter(e) {
     e.stopPropagation();
+    var wasOpen = document.getElementById('univ-filter').classList.contains('open');
     document.getElementById('univ-filter').classList.toggle('open');
+    if (!wasOpen) {
+      var s = document.getElementById('univ-filter-search');
+      if (s) { s.value = ''; filterHomeUnivOptions(''); s.focus(); }
+    }
   }
 
   document.querySelectorAll('.univ-filter-option').forEach(function(el) {
@@ -518,7 +536,6 @@ export async function homePage(c: AppContext) {
       e.stopPropagation();
       var val = this.dataset.value;
       document.getElementById('univ-filter-value').value = val;
-      // Update trigger label and icon
       document.getElementById('univ-filter-label').textContent = val || 'All universities';
       document.querySelectorAll('.univ-filter-option').forEach(function(o) {
         o.classList.toggle('selected', o.dataset.value === val);
@@ -546,6 +563,8 @@ export async function homePage(c: AppContext) {
   }
   document.addEventListener('click', function() {
     document.getElementById('univ-filter').classList.remove('open');
+    var s = document.getElementById('univ-filter-search');
+    if (s) { s.value = ''; filterHomeUnivOptions(''); }
   });
 </script>
 ${footer}

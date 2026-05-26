@@ -36,5 +36,6 @@ export interface PhotographerProfile {
   user_id:                  string;
   layout_mode:              string;
   grid_images:              string;
+  also_serves:              string;
   subscription_level:       string;
 }

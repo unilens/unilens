@@ -17,8 +17,7 @@ export async function savePortfolio(c: AppContext) {
     return c.json({ error: 'Only photographers can save a portfolio' }, 403);
   }
 
-  const { bio, portfolio_html, slug, price_min, price_max, commission_open, avatar_url, university, layout_mode, grid_images } = await c.req.json();
-
+  const { bio, portfolio_html, slug, price_min, price_max, commission_open, avatar_url, university, layout_mode, grid_images, also_serves } = await c.req.json();
   if (!slug || !/^[a-z0-9-]+$/.test(slug)) {
     return c.json({ error: 'Slug must be lowercase letters, numbers, and hyphens only' }, 400);
   }
@@ -42,6 +41,15 @@ export async function savePortfolio(c: AppContext) {
   if (pMin != null && pMax != null && pMin > pMax) {
     return c.json({ error: 'Minimum price cannot exceed maximum price' }, 400);
   }
+  const alsoServesArr: string[] = Array.isArray(also_serves) ? also_serves : [];
+  const tierForSave = TIERS[getTier(
+    (await c.env.unilens_db.prepare(`SELECT subscription_level FROM photographer_profiles WHERE user_id = ?`)
+      .bind(user.id).first<{ subscription_level: string }>())?.subscription_level ?? 'basic'
+  )];
+  if (alsoServesArr.length > tierForSave.alsoServesLimit) {
+    return c.json({ error: `Your plan allows up to ${tierForSave.alsoServesLimit} additional universities` }, 400);
+  }
+  const alsoServesJson = JSON.stringify(alsoServesArr.slice(0, tierForSave.alsoServesLimit));
 
   const slugTaken = await c.env.unilens_db.prepare(
     `SELECT user_id FROM photographer_profiles WHERE slug = ? AND user_id != ?`
@@ -53,8 +61,8 @@ export async function savePortfolio(c: AppContext) {
   const sanitized = sanitizePortfolio(portfolio_html ?? '');
 
   await c.env.unilens_db.prepare(`
-  INSERT INTO photographer_profiles (user_id, bio, portfolio_html, slug, price_min, price_max, commission_open, avatar_url, university, layout_mode, grid_images, subscription_level)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'basic')
+  INSERT INTO photographer_profiles (user_id, bio, portfolio_html, slug, price_min, price_max, commission_open, avatar_url, university, layout_mode, grid_images, also_serves, subscription_level)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'basic')
   ON CONFLICT(user_id) DO UPDATE SET
     bio             = excluded.bio,
     portfolio_html  = excluded.portfolio_html,
@@ -65,8 +73,9 @@ export async function savePortfolio(c: AppContext) {
     avatar_url      = excluded.avatar_url,
     university      = excluded.university,
     layout_mode     = excluded.layout_mode,
-    grid_images     = excluded.grid_images
-`).bind(user.id, bio ?? '', sanitized, slug, pMin ?? null, pMax ?? null, commission_open ?? 1, avatar_url ?? null, university ?? null, layout_mode ?? 'simple', grid_images ?? '[]').run();
+    grid_images     = excluded.grid_images,
+    also_serves     = excluded.also_serves
+`).bind(user.id, bio ?? '', sanitized, slug, pMin ?? null, pMax ?? null, commission_open ?? 1, avatar_url ?? null, university ?? null, layout_mode ?? 'simple', grid_images ?? '[]', alsoServesJson).run();
 
   return c.json({ success: true, slug });
 }
@@ -95,7 +104,8 @@ export async function getProfile(c: AppContext) {
       ROUND(AVG(r.score), 1)  AS avg_rating,
       COUNT(r.id)             AS review_count,
       p.user_id,
-      p.subscription_level
+      p.subscription_level,
+      p.also_serves
     FROM photographer_profiles p
     JOIN users u ON u.id = p.user_id
     LEFT JOIN ratings r ON r.photographer_id = p.user_id
@@ -468,6 +478,21 @@ ${profile.university ?? 'University not set'}
         </div>
         ${commissionBadge}
         ${proBadgeHtml}
+        ${(() => {
+          const alsoServes: string[] = JSON.parse(profile.also_serves ?? '[]');
+          if (!alsoServes.length) return '';
+          return `<div style="margin-top:10px;">
+            <div style="font-size:11px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:6px;">Also serves</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+              ${alsoServes.map(u => {
+                const svg = getUniversitySvg(u);
+                return `<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 8px;border:1.5px solid var(--color-border);border-radius:var(--radius-full);">
+                  ${svg ? svg.replace('<svg ', '<svg width="14" height="14" ') : ''}${esc(u)}
+                </span>`;
+              }).join('')}
+            </div>
+          </div>`;
+        })()}
         ${userRole === 'client' ? `
         <button id="save-btn" onclick="toggleSave()"
           style="display:inline-flex;align-items:center;gap:6px;margin-top:10px;
