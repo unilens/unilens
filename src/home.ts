@@ -301,11 +301,11 @@ export async function homePage(c: AppContext) {
   border-radius: var(--radius-md);
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
   z-index: 50;
-  max-height: 260px;
-  overflow-y: auto;
+  max-height: 300px;
+  display: none;
+  flex-direction: column;
 }
-
-.univ-filter.open .univ-filter-options { display: block; }
+.univ-filter.open .univ-filter-options { display: flex; }
 
 .univ-filter-option {
   display: flex;
@@ -328,6 +328,10 @@ export async function homePage(c: AppContext) {
 
 .univ-filter-opt-icon svg { width: 22px; height: 22px; display: block; }
 
+.univ-filter-options-list {
+  overflow-y: auto;
+  flex: 1;
+}
     .section-label {
       font-size: 13px;
       font-weight: 500;
@@ -457,13 +461,15 @@ export async function homePage(c: AppContext) {
         </svg>
       </div>
       <div class="univ-filter-options">
-        <div style="padding:6px 8px;border-bottom:1px solid var(--color-border);">
+        <div style="padding:6px 8px;border-bottom:1px solid var(--color-border);flex-shrink:0;">
           <input id="univ-filter-search" type="text" placeholder="Search..." onclick="event.stopPropagation()"
             oninput="filterHomeUnivOptions(this.value)"
             style="width:100%;border:1.5px solid var(--color-border);border-radius:var(--radius-sm);padding:5px 8px;font-family:var(--font-sans);font-size:12px;outline:none;">
         </div>
-        <div class="univ-filter-option${!university ? ' selected' : ''}" data-value="">All universities</div>
-        ${universityOptions}
+        <div class="univ-filter-options-list">
+          <div class="univ-filter-option${!university ? ' selected' : ''}" data-value="">All universities</div>
+          ${universityOptions}
+        </div>
       </div>
       <input type="hidden" id="univ-filter-value" value="${esc(university)}">
     </div>
@@ -515,7 +521,7 @@ export async function homePage(c: AppContext) {
 
   function filterHomeUnivOptions(q) {
     q = q.toLowerCase();
-    document.querySelectorAll('.univ-filter-option').forEach(function(el) {
+    document.querySelectorAll('.univ-filter-options-list .univ-filter-option').forEach(function(el) {
       var val = (el.dataset.value || '').toLowerCase();
       el.style.display = (!q || val === '' || val.includes(q)) ? '' : 'none';
     });

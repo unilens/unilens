@@ -821,6 +821,13 @@ export async function dashboardPage(c: AppContext) {
 
   <script>
     // Show upgrade success toast
+    function showToast(msg) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(function() { t.classList.remove('show'); }, 2500);
+    }
+
     if (new URLSearchParams(location.search).get('upgrade') === 'success') {
       showToast('🎉 Plan upgraded successfully!');
     }
@@ -1050,13 +1057,6 @@ function moveGridImage(index, dir) {
         document.getElementById('portfolio-html').value = undoStack.pop();
         updatePreview();
       }
-    }
-
-    function showToast(msg) {
-      var t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(function() { t.classList.remove('show'); }, 2500);
     }
 
     async function uploadAvatar(input) {
