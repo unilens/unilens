@@ -1,375 +1,145 @@
 export interface University {
-  name: string;
-  svg:  string;
+  name:   string;
+  color1: string; // circle fill (hex, no #)
+  color2: string; // text fill (hex, no #)
+  short:  string;
+}
+
+export function buildSvg(u: University): string {
+  const fs = u.short.length <= 2 ? 13 : u.short.length === 3 ? 10 : 8;
+  return `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="20" fill="#${u.color1}"/><text x="20" y="25" text-anchor="middle" font-family="serif" font-weight="bold" font-size="${fs}" fill="#${u.color2}">${u.short}</text></svg>`;
 }
 
 export function getUniversitySvg(name: string): string {
-  return universities.find(u => u.name === name)?.svg ?? '';
+  const u = universities.find(u => u.name === name);
+  return u ? buildSvg(u) : '';
 }
 
 export const universities: University[] = [
-  {
-    name: 'None',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#000000"/>
-      <text x="20" y="25" text-anchor="middle" font-family="serif" font-weight="bold" font-size="13" fill="white">N/A</text>
-    </svg>`,
-  },
-  {
-    name: 'University of Georgia',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#BA0C2F"/>
-      <text x="20" y="25" text-anchor="middle" font-family="serif" font-weight="bold" font-size="13" fill="white">UGA</text>
-    </svg>`,
-  },
-  {
-    name: 'University of Vermont',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#077e23"/>
-      <text x="20" y="25" text-anchor="middle" font-family="serif" font-weight="bold" font-size="13" fill="gold">UVM</text>
-    </svg>`,
-  },
-  {
-    name: 'Georgia Institute of Technology',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#003057"/>
-      <text x="20" y="23" text-anchor="middle" font-family="serif" font-weight="bold" font-size="10" fill="#B3A369">GT</text>
-    </svg>`,
-  },
-  {
-    name: 'Harvard University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#A51C30"/>
-      <text x="20" y="25" text-anchor="middle" font-family="serif" font-weight="bold" font-size="10" fill="white">HU</text>
-    </svg>`,
-  },
-  {
-    name: 'Yale University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#00356B"/>
-      <text x="20" y="25" text-anchor="middle" font-family="serif" font-weight="bold" font-size="10" fill="white">YU</text>
-    </svg>`,
-  },
-  {
-    name: 'Princeton University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#FF8F00"/>
-      <text x="20" y="25" text-anchor="middle" font-family="serif" font-weight="bold" font-size="9" fill="black">PU</text>
-    </svg>`,
-  },
-  {
-    name: 'Stanford University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#8C1515"/>
-      <text x="20" y="25" text-anchor="middle" font-family="serif" font-weight="bold" font-size="9" fill="white">SU</text>
-    </svg>`,
-  },
-  {
-    name: 'Massachusetts Institute of Technology',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#A31F34"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="white">MIT</text>
-    </svg>`,
-  },
-  {
-    name: 'California Institute of Technology',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#FF6F00"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="white">CIT</text>
-    </svg>`,
-  },
-  {
-    name: 'Columbia University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#9BDDFF"/>
-      <text x="20" y="25" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="#003366">CU</text>
-    </svg>`,
-  },
-  {
-    name: 'University of Pennsylvania',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#011F5B"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="#990000">UP</text>
-    </svg>`,
-  },
-  {
-    name: 'Cornell University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#B31B1B"/>
-      <text x="20" y="25" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="white">CU</text>
-    </svg>`,
-  },
-  {
-    name: 'Duke University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#003087"/>
-      <text x="20" y="25" text-anchor="middle" font-family="serif" font-weight="bold" font-size="9" fill="white">DU</text>
-    </svg>`,
-  },
-  {
-    name: 'Northwestern University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#4E2A84"/>
-      <text x="20" y="25" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="white">NU</text>
-    </svg>`,
-  },
-  {
-    name: 'University of Michigan',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#00274C"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="9" fill="#FFCB05">UM</text>
-    </svg>`,
-  },
-  {
-    name: 'University of California, Berkeley',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#003262"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="#FDB515">UCB</text>
-    </svg>`,
-  },
-  {
-    name: 'University of California, Los Angeles',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#2774AE"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="#FFD100">UCLA</text>
-    </svg>`,
-  },
-  {
-    name: 'University of Southern California',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#990000"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="#FFC72C">USC</text>
-    </svg>`,
-  },
-  {
-    name: 'New York University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#57068C"/>
-      <text x="20" y="25" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="white">NYU</text>
-    </svg>`,
-  },
-  {
-    name: 'University of Texas at Austin',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#BF5700"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="white">UT</text>
-    </svg>`,
-  },
-  {
-    name: 'Texas A&M University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#500000"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="white">TAMU</text>
-    </svg>`,
-  },
-  {
-    name: 'University of Florida',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#0021A5"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="#FA4616">UF</text>
-    </svg>`,
-  },
-  {
-    name: 'Florida State University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#782F40"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="#CEB888">FSU</text>
-    </svg>`,
-  },
-  {
-    name: 'Ohio State University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#BB0000"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="white">OSU</text>
-    </svg>`,
-  },
-  {
-    name: 'Pennsylvania State University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#041E42"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="7" fill="white">PSU</text>
-    </svg>`,
-  },
-  {
-    name: 'University of Washington',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#4B2E83"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="#B7A57A">UW</text>
-    </svg>`,
-  },
-  {
-    name: 'University of Wisconsin–Madison',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#C5050C"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="white">UW</text>
-    </svg>`,
-  },
-  {
-    name: 'University of Illinois Urbana-Champaign',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#13294B"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="7" fill="#E84A27">UIUC</text>
-    </svg>`,
-  },
-  {
-    name: 'Purdue University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#CFB991"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="black">PU</text>
-    </svg>`,
-  },
-  {
-    name: 'Indiana University Bloomington',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#990000"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="white">IU</text>
-    </svg>`,
-  },
-  {
-    name: 'University of Miami',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#F47321"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="#005030">UM</text>
-    </svg>`,
-  },
-  {
-    name: 'University of North Carolina at Chapel Hill',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#7BAFD4"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="7" fill="white">UNC</text>
-    </svg>`,
-  },
-  {
-    name: 'North Carolina State University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#CC0000"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="7" fill="white">NCSU</text>
-    </svg>`,
-  },
-  {
-    name: 'Clemson University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#F56600"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="#522D80">CU</text>
-    </svg>`,
-  },
-  {
-    name: 'Auburn University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#0C2340"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="8" fill="#E87722">AU</text>
-    </svg>`,
-  },
-  {
-    name: 'University of Alabama',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#9E1B32"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="7" fill="white">UA</text>
-    </svg>`,
-  },
-  {
-    name: 'University of Tennessee',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#FF8200"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="7" fill="white">UTK</text>
-    </svg>`,
-  },
-  {
-    name: 'Louisiana State University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#461D7C"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="7" fill="#FDD023">LSU</text>
-    </svg>`,
-  },
-  {
-    name: 'University of Virginia',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#232D4B"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="7" fill="#F84C1E">UVA</text>
-    </svg>`,
-  },
-  {
-    name: 'Virginia Tech',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#630031"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="7" fill="#CF4420">VT</text>
-    </svg>`,
-  },
-  {
-    name: 'Arizona State University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#8C1D40"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="7" fill="#FFC627">ASU</text>
-    </svg>`,
-  },
-  {
-    name: 'University of Arizona',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#AB0520"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="7" fill="#0C234B">UA</text>
-    </svg>`,
-  },
-  {
-    name: 'University of Colorado Boulder',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#000000"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="7" fill="#CFB87C">CU</text>
-    </svg>`,
-  },
-  {
-    name: 'University of Oregon',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#154733"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="7" fill="#FEE123">UO</text>
-    </svg>`,
-  },
-  {
-    name: 'Oregon State University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#DC4405"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="7" fill="black">OSU</text>
-    </svg>`,
-  },
-  {
-    name: 'University of Minnesota',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#7A0019"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="7" fill="#FFCC33">UMN</text>
-    </svg>`,
-  },
-  {
-    name: 'Michigan State University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#18453B"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="7" fill="white">MSU</text>
-    </svg>`,
-  },
-  {
-    name: 'University of Notre Dame',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#0C2340"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="7" fill="#C99700">ND</text>
-    </svg>`,
-  },
-  {
-    name: 'Rice University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#00205B"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="7" fill="white">RU</text>
-    </svg>`,
-  },
-  {
-    name: 'Vanderbilt University',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#866D4B"/>
-      <text x="20" y="24" text-anchor="middle" font-family="serif" font-weight="bold" font-size="7" fill="black">VU</text>
-    </svg>`,
-  },
-  {
-    name: 'Exampletown College',
-    svg: `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="20" cy="20" r="20" fill="#fbff00"/>
-      <text x="20" y="25" text-anchor="middle" font-family="serif" font-weight="bold" font-size="13" fill="red">EX</text>
-    </svg>`,
-  },
+  { name: 'None',                                          color1: '000000', color2: 'ffffff', short: 'N/A'  },
+  { name: 'University of Georgia',                         color1: 'BA0C2F', color2: 'ffffff', short: 'UGA'  },
+  { name: 'University of Vermont',                         color1: '077e23', color2: 'FFD700', short: 'UVM'  },
+  { name: 'Georgia Institute of Technology',               color1: '003057', color2: 'B3A369', short: 'GT'   },
+  { name: 'Harvard University',                            color1: 'A51C30', color2: 'ffffff', short: 'HU'   },
+  { name: 'Yale University',                               color1: '00356B', color2: 'ffffff', short: 'YU'   },
+  { name: 'Princeton University',                          color1: 'FF8F00', color2: '000000', short: 'PU'   },
+  { name: 'Stanford University',                           color1: '8C1515', color2: 'ffffff', short: 'SU'   },
+  { name: 'Massachusetts Institute of Technology',         color1: 'A31F34', color2: 'ffffff', short: 'MIT'  },
+  { name: 'California Institute of Technology',            color1: 'FF6F00', color2: 'ffffff', short: 'CIT'  },
+  { name: 'Columbia University',                           color1: '9BDDFF', color2: '003366', short: 'CU'   },
+  { name: 'University of Pennsylvania',                    color1: '011F5B', color2: '990000', short: 'UP'   },
+  { name: 'Cornell University',                            color1: 'B31B1B', color2: 'ffffff', short: 'CU'   },
+  { name: 'Duke University',                               color1: '003087', color2: 'ffffff', short: 'DU'   },
+  { name: 'Northwestern University',                       color1: '4E2A84', color2: 'ffffff', short: 'NU'   },
+  { name: 'University of Michigan',                        color1: '00274C', color2: 'FFCB05', short: 'UM'   },
+  { name: 'University of California, Berkeley',            color1: '003262', color2: 'FDB515', short: 'UCB'  },
+  { name: 'University of California, Los Angeles',         color1: '2774AE', color2: 'FFD100', short: 'UCLA' },
+  { name: 'University of Southern California',             color1: '990000', color2: 'FFC72C', short: 'USC'  },
+  { name: 'New York University',                           color1: '57068C', color2: 'ffffff', short: 'NYU'  },
+  { name: 'University of Texas at Austin',                 color1: 'BF5700', color2: 'ffffff', short: 'UT'   },
+  { name: 'Texas A&M University',                          color1: '500000', color2: 'ffffff', short: 'TAMU' },
+  { name: 'University of Florida',                         color1: '0021A5', color2: 'FA4616', short: 'UF'   },
+  { name: 'Florida State University',                      color1: '782F40', color2: 'CEB888', short: 'FSU'  },
+  { name: 'Ohio State University',                         color1: 'BB0000', color2: 'ffffff', short: 'OSU'  },
+  { name: 'Pennsylvania State University',                 color1: '041E42', color2: 'ffffff', short: 'PSU'  },
+  { name: 'University of Washington',                      color1: '4B2E83', color2: 'B7A57A', short: 'UW'   },
+  { name: 'University of Wisconsin–Madison',               color1: 'C5050C', color2: 'ffffff', short: 'UW'   },
+  { name: 'University of Illinois Urbana-Champaign',       color1: '13294B', color2: 'E84A27', short: 'UIUC' },
+  { name: 'Purdue University',                             color1: 'CFB991', color2: '000000', short: 'PU'   },
+  { name: 'Indiana University Bloomington',                color1: '990000', color2: 'ffffff', short: 'IU'   },
+  { name: 'University of Miami',                           color1: 'F47321', color2: '005030', short: 'UM'   },
+  { name: 'University of North Carolina at Chapel Hill',   color1: '7BAFD4', color2: 'ffffff', short: 'UNC'  },
+  { name: 'North Carolina State University',               color1: 'CC0000', color2: 'ffffff', short: 'NCSU' },
+  { name: 'Clemson University',                            color1: 'F56600', color2: '522D80', short: 'CU'   },
+  { name: 'Auburn University',                             color1: '0C2340', color2: 'E87722', short: 'AU'   },
+  { name: 'University of Alabama',                         color1: '9E1B32', color2: 'ffffff', short: 'UA'   },
+  { name: 'University of Tennessee',                       color1: 'FF8200', color2: 'ffffff', short: 'UTK'  },
+  { name: 'Louisiana State University',                    color1: '461D7C', color2: 'FDD023', short: 'LSU'  },
+  { name: 'University of Virginia',                        color1: '232D4B', color2: 'F84C1E', short: 'UVA'  },
+  { name: 'Virginia Tech',                                 color1: '630031', color2: 'CF4420', short: 'VT'   },
+  { name: 'Arizona State University',                      color1: '8C1D40', color2: 'FFC627', short: 'ASU'  },
+  { name: 'University of Arizona',                         color1: 'AB0520', color2: '0C234B', short: 'UA'   },
+  { name: 'University of Colorado Boulder',                color1: '000000', color2: 'CFB87C', short: 'CU'   },
+  { name: 'University of Oregon',                          color1: '154733', color2: 'FEE123', short: 'UO'   },
+  { name: 'Oregon State University',                       color1: 'DC4405', color2: '000000', short: 'OSU'  },
+  { name: 'University of Minnesota',                       color1: '7A0019', color2: 'FFCC33', short: 'UMN'  },
+  { name: 'Michigan State University',                     color1: '18453B', color2: 'ffffff', short: 'MSU'  },
+  { name: 'University of Notre Dame',                      color1: '0C2340', color2: 'C99700', short: 'ND'   },
+  { name: 'Rice University',                               color1: '00205B', color2: 'ffffff', short: 'RU'   },
+  { name: 'Vanderbilt University',                         color1: '866D4B', color2: '000000', short: 'VU'   },
+    { name: 'University of Arkansas',                        color1: '9D2235', color2: 'ffffff', short: 'UARK' },
+  { name: 'University of Central Florida',                 color1: 'BA9B37', color2: '000000', short: 'UCF'  },
+  { name: 'University of South Florida',                   color1: '006747', color2: 'CFC493', short: 'USF'  },
+  { name: 'University of Kentucky',                        color1: '0033A0', color2: 'ffffff', short: 'UK'   },
+  { name: 'University of Louisville',                      color1: 'AD0000', color2: '000000', short: 'UL'   },
+  { name: 'University of Kansas',                          color1: '0051BA', color2: 'E8000D', short: 'KU'   },
+  { name: 'Kansas State University',                       color1: '512888', color2: 'ffffff', short: 'KSU'  },
+  { name: 'University of Missouri',                        color1: 'F1B82D', color2: '000000', short: 'MIZZ' },
+  { name: 'University of Nebraska–Lincoln',                color1: 'D00000', color2: 'ffffff', short: 'UNL'  },
+  { name: 'University of Iowa',                            color1: 'FFCD00', color2: '000000', short: 'UI'   },
+  { name: 'Iowa State University',                         color1: 'C8102E', color2: 'F1BE48', short: 'ISU'  },
+  { name: 'University of Oklahoma',                        color1: '841617', color2: 'FDF9D8', short: 'OU'   },
+  { name: 'Oklahoma State University',                     color1: 'FF7300', color2: '000000', short: 'OKST' },
+  { name: 'University of Mississippi',                     color1: 'CE1126', color2: '14213D', short: 'UM'   },
+  { name: 'Mississippi State University',                  color1: '660000', color2: 'ffffff', short: 'MSST' },
+  { name: 'University of South Carolina',                  color1: '73000A', color2: '000000', short: 'USC'  },
+  { name: 'Wake Forest University',                        color1: '9E7E38', color2: '000000', short: 'WFU'  },
+  { name: 'University of Connecticut',                     color1: '000E2F', color2: 'ffffff', short: 'UCON' },
+  { name: 'Rutgers University',                            color1: 'CC0033', color2: 'ffffff', short: 'RU'   },
+  { name: 'University of Delaware',                        color1: '00539F', color2: 'FEC600', short: 'UD'   },
+  { name: 'West Virginia University',                      color1: '002855', color2: 'EAAA00', short: 'WVU'  },
+  { name: 'University of Nevada, Las Vegas',               color1: 'CF0A2C', color2: '000000', short: 'UNLV' },
+  { name: 'University of Nevada, Reno',                    color1: '003366', color2: '807F84', short: 'UNR'  },
+  { name: 'University of New Mexico',                      color1: 'BA0C2F', color2: '8BB8E8', short: 'UNM'  },
+  { name: 'University of Utah',                            color1: 'CC0000', color2: 'ffffff', short: 'UU'   },
+  { name: 'Brigham Young University',                      color1: '002E5D', color2: 'ffffff', short: 'BYU'  },
+  { name: 'University of Idaho',                           color1: 'B3A369', color2: '000000', short: 'UID'  },
+  { name: 'Boise State University',                        color1: '0033A0', color2: 'D64309', short: 'BSU'  },
+  { name: 'University of Montana',                         color1: '660033', color2: '999999', short: 'UMT'  },
+  { name: 'Montana State University',                      color1: '0D2A52', color2: 'D1A15F', short: 'MSU'  },
+  { name: 'University of Wyoming',                         color1: '492F24', color2: 'FFC425', short: 'UWYO' },
+  { name: 'University of South Dakota',                    color1: 'AD0000', color2: 'ffffff', short: 'USD'  },
+  { name: 'South Dakota State University',                 color1: '003DA5', color2: 'FDD023', short: 'SDSU' },
+  { name: 'University of North Dakota',                    color1: '009A44', color2: 'ffffff', short: 'UND'  },
+  { name: 'North Dakota State University',                 color1: 'FFC72C', color2: '0B5E36', short: 'NDSU' },
+  { name: 'University of Maine',                           color1: '003263', color2: 'ffffff', short: 'UMAI' },
+  { name: 'University of New Hampshire',                   color1: '003591', color2: 'ffffff', short: 'UNH'  },
+  { name: 'University of Rhode Island',                    color1: '75AADB', color2: '003DA5', short: 'URI'  },
+  { name: 'Providence College',                            color1: '000000', color2: 'B9975B', short: 'PC'   },
+  { name: 'University of Massachusetts Amherst',           color1: '881C1C', color2: 'ffffff', short: 'UMA'  },
+  { name: 'Boston University',                             color1: 'CC0000', color2: 'ffffff', short: 'BU'   },
+  { name: 'Boston College',                                color1: '98002E', color2: 'BC8A00', short: 'BC'   },
+  { name: 'Syracuse University',                           color1: 'F76900', color2: '0D1D37', short: 'SU'   },
+  { name: 'University at Buffalo',                         color1: '005BBB', color2: 'ffffff', short: 'UB'   },
+  { name: 'Temple University',                             color1: '9D2235', color2: 'ffffff', short: 'TEM'  },
+  { name: 'Drexel University',                             color1: '07294D', color2: 'FFCC00', short: 'DU'   },
+  { name: 'University of Cincinnati',                      color1: 'E00122', color2: '000000', short: 'UC'   },
+  { name: 'University of Akron',                           color1: '041E42', color2: 'FFC72C', short: 'UAK'  },
+  { name: 'Wayne State University',                        color1: '006B53', color2: 'CFC493', short: 'WSU'  },
+  { name: 'Western Michigan University',                   color1: '6C4023', color2: 'B5A167', short: 'WMU'  },
+  { name: 'Marquette University',                          color1: '003366', color2: 'FFCC00', short: 'MU'   },
+  { name: 'University of Memphis',                         color1: '003087', color2: '898D8D', short: 'MEM'  },
+  { name: 'Tulane University',                             color1: '006747', color2: '418FDE', short: 'TU'   },
+  { name: 'University of Houston',                         color1: 'C8102E', color2: 'ffffff', short: 'UH'   },
+  { name: 'Baylor University',                             color1: '154734', color2: 'FFB81C', short: 'BU'   },
+  { name: 'Texas Tech University',                         color1: 'CC0000', color2: '000000', short: 'TTU'  },
+  { name: 'Southern Methodist University',                 color1: 'C8102E', color2: '0033A0', short: 'SMU'  },
+  { name: 'University of San Diego',                       color1: '00205B', color2: '75AADB', short: 'USD'  },
+  { name: 'San Diego State University',                    color1: 'A6192E', color2: '000000', short: 'SDSU' },
+  { name: 'University of California, San Diego',           color1: '182B49', color2: 'FFCD00', short: 'UCSD' },
+  { name: 'University of California, Davis',               color1: '022851', color2: 'FFBF00', short: 'UCD'  },
+  { name: 'University of California, Irvine',              color1: '0064A4', color2: 'FFCC33', short: 'UCI'  },
+  { name: 'University of California, Santa Barbara',       color1: '003660', color2: 'F2A900', short: 'UCSB' },
+  { name: 'Pepperdine University',                         color1: '00205C', color2: 'F2A900', short: 'PEP'  },
+  { name: 'University of Hawaiʻi at Mānoa',                color1: '024731', color2: 'B4975A', short: 'UH'   },
+  { name: 'University of Alaska Anchorage',                color1: '005DAA', color2: 'FFCD00', short: 'UAA'  },
+  { name: 'University of Alaska Fairbanks',                color1: '236192', color2: 'FFCD00', short: 'UAF'  },
+  { name: 'Gonzaga University',                            color1: '041E42', color2: 'C8102E', short: 'GU'   },
+  { name: 'Washington State University',                   color1: '981E32', color2: '5E6A71', short: 'WSU'  },
+{ name: 'Vermont State University',                        color1: '154734', color2: 'C99700', short: 'VTSU' },
+  { name: 'Towson University',                             color1: 'FFCC00', color2: '000000', short: 'TU'   },
+  { name: 'University of Maryland',                        color1: 'E03A3E', color2: 'FFD520', short: 'UMD'  },
+  { name: 'Georgetown University',                         color1: '041E42', color2: '9EA2A2', short: 'GU'   },
+  { name: 'George Washington University',                  color1: '002147', color2: 'CBB677', short: 'GWU'  },
+  { name: 'Exampletown College',                           color1: 'fbff00', color2: 'ff0000', short: 'EX'   },
 ];

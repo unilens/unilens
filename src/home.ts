@@ -5,7 +5,7 @@ import { getUniversitySvg } from './universities';
 import { TIERS, getTier } from './tiers';
 import { biasOrderClause } from './search-bias';
 import { esc } from './escape';
-import { universities as allUniversities } from './universities';
+import { universities as allUniversities, buildSvg } from './universities';
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
 
@@ -171,8 +171,7 @@ export async function homePage(c: AppContext) {
   const universityOptions = allUniversities
     .filter(u => u.name !== 'None')
     .map(u => {
-      const sized = u.svg.replace('<svg ', '<svg width="22" height="22" ');
-      const sel = university === u.name ? ' selected' : '';
+      const sized = buildSvg(u).replace('<svg ', '<svg width="22" height="22" ');      const sel = university === u.name ? ' selected' : '';
       return `
     <div class="univ-filter-option${sel}" data-value="${u.name.replace(/"/g, '&quot;')}">
       <span class="univ-filter-opt-icon">${sized}</span>

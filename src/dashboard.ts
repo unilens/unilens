@@ -1,7 +1,7 @@
 import { Context } from 'hono';
 import { Env, Variables } from './types';
 import { theme, favicon, topbarStyles, topbar, footer } from './theme';
-import { universities, getUniversitySvg } from './universities';
+import { universities, getUniversitySvg, buildSvg } from './universities';
 import { TIERS, getTier } from './tiers';
 import { esc } from './escape';
 
@@ -26,7 +26,7 @@ export async function dashboardPage(c: AppContext) {
   const tierConfig = TIERS[getTier(profile?.subscription_level ?? 'basic')];
   // Resolve the currently-selected university for server-side render
   const currentUniv = universities.find(u => u.name === profile?.university);
-  const rawIcon = currentUniv?.svg ?? '';
+  const rawIcon = currentUniv ? buildSvg(currentUniv) : '';
   const currentIcon = rawIcon.replace(/`/g, '&#96;').replace(/\$\{/g, '&#36;{');
   const currentLabel = profile?.university ?? 'Select university...';
   const layoutMode = profile?.layout_mode ?? 'simple';
@@ -46,7 +46,7 @@ export async function dashboardPage(c: AppContext) {
     const safeName = u.name.replace(/"/g, '&quot;');
     return `
       <div class="univ-option${selected}" data-name="${safeName}">
-        <span class="univ-opt-icon">${safeSvg(u.svg)}</span>
+        <span class="univ-opt-icon">${safeSvg(buildSvg(u))}</span>
         <span>${u.name}</span>
       </div>`;
   }).join('');
