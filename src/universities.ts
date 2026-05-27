@@ -135,10 +135,12 @@ export const universities: University[] = [
   { name: 'University of Alaska Fairbanks',                color1: '236192', color2: 'FFCD00', short: 'UAF'  },
   { name: 'Gonzaga University',                            color1: '041E42', color2: 'C8102E', short: 'GU'   },
   { name: 'Washington State University',                   color1: '981E32', color2: '5E6A71', short: 'WSU'  },
-{ name: 'Vermont State University',                        color1: '154734', color2: 'C99700', short: 'VTSU' },
+  { name: 'Vermont State University',                      color1: '154734', color2: 'C99700', short: 'VTSU' },
   { name: 'Towson University',                             color1: 'FFCC00', color2: '000000', short: 'TU'   },
   { name: 'University of Maryland',                        color1: 'E03A3E', color2: 'FFD520', short: 'UMD'  },
   { name: 'Georgetown University',                         color1: '041E42', color2: '9EA2A2', short: 'GU'   },
   { name: 'George Washington University',                  color1: '002147', color2: 'CBB677', short: 'GWU'  },
+  { name: 'Colorado State University',                     color1: '1E4D2B', color2: 'C8C372', short: 'CSU' },
+  { name: 'University of Denver',                          color1: '8B2332', color2: 'C8C8C8', short: 'DU' },
   { name: 'Exampletown College',                           color1: 'fbff00', color2: 'ff0000', short: 'EX'   },
 ];
