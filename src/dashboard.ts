@@ -53,10 +53,10 @@ export async function dashboardPage(c: AppContext) {
 
   function alsoServesTagHtml(name: string) {
     const svg = getUniversitySvg(name);
-    return `<span class="also-tag" data-name="${esc(name)}" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border:1.5px solid var(--color-border);border-radius:var(--radius-full);background:white;">
+    return `<span class="also-tag" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border:1.5px solid var(--color-border);border-radius:var(--radius-full);background:white;">
       ${svg ? svg.replace('<svg ', '<svg width="14" height="14" ') : ''}
       ${esc(name)}
-      <button onclick="removeAlsoServes('${esc(name)}')" style="background:none;border:none;cursor:pointer;padding:0;font-size:14px;line-height:1;color:var(--color-text-muted);">×</button>
+      <button class="also-tag-remove" data-name="${esc(name)}" style="background:none;border:none;cursor:pointer;padding:0;font-size:14px;line-height:1;color:var(--color-text-muted);">×</button>
     </span>`;
   }
   
@@ -922,15 +922,21 @@ export async function dashboardPage(c: AppContext) {
       container.innerHTML = alsoServes.map(function(name) {
         var opt = document.querySelector('#also-serves-options .univ-option[data-name="' + name.replace(/"/g, '&quot;') + '"]');
         var iconHtml = opt ? opt.querySelector('.univ-opt-icon').innerHTML : '';
-        return '<span class="also-tag" data-name="' + name.replace(/"/g, '&quot;') + '" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border:1.5px solid var(--color-border);border-radius:var(--radius-full);background:white;">' +
+        return '<span class="also-tag" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border:1.5px solid var(--color-border);border-radius:var(--radius-full);background:white;">' +
           iconHtml.replace('<svg ', '<svg width="14" height="14" ') +
           name +
-          '<button onclick="removeAlsoServes(' + JSON.stringify(name) + ')" style="background:none;border:none;cursor:pointer;padding:0;font-size:14px;line-height:1;color:var(--color-text-muted);">\xd7</button>' +
+          '<button class="also-tag-remove" data-name="' + name.replace(/"/g, '&quot;') + '" style="background:none;border:none;cursor:pointer;padding:0;font-size:14px;line-height:1;color:var(--color-text-muted);">\xd7</button>' +
           '</span>';
       }).join('');
       var lbl = document.getElementById('also-serves-count-label');
       if (lbl) lbl.textContent = '(' + alsoServes.length + '/' + alsoServesLimit + ' additional)';
     }
+    document.getElementById('also-serves-tags').addEventListener('click', function(e) {
+      var btn = e.target.closest('.also-tag-remove');
+      if (!btn) return;
+      e.stopPropagation();
+      removeAlsoServes(btn.dataset.name);
+    });
 
     function removeAlsoServes(name) {
       alsoServes = alsoServes.filter(function(u) { return u !== name; });
