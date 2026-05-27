@@ -189,12 +189,21 @@ export async function adminSetTier(c: AppContext) {
 
   if (tier === 'basic') {
     await c.env.unilens_db.prepare(
-      `UPDATE photographer_profiles SET subscription_level = 'basic', stripe_subscription_id = NULL WHERE user_id = ?`
+      `UPDATE photographer_profiles SET subscription_level = 'basic', stripe_subscription_id = NULL, also_serves = '[]' WHERE user_id = ?`
     ).bind(user_id).run();
   } else {
+    const newLimit = tier === 'plus' ? 2 : 5;
     await c.env.unilens_db.prepare(
-      `UPDATE photographer_profiles SET subscription_level = ? WHERE user_id = ?`
-    ).bind(tier, user_id).run();
+      `UPDATE photographer_profiles
+       SET subscription_level = ?,
+           also_serves = (
+             SELECT json(json_group_array(value))
+             FROM (
+               SELECT value FROM json_each(also_serves) LIMIT ?
+             )
+           )
+       WHERE user_id = ?`
+    ).bind(tier, newLimit, user_id).run();
   }
 
   return c.json({ ok: true });

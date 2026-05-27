@@ -75,7 +75,7 @@ export async function stripeWebhook(c: AppContext) {
     if (userId) {
       await c.env.unilens_db.prepare(
         `UPDATE photographer_profiles
-         SET subscription_level = 'basic', stripe_subscription_id = NULL
+         SET subscription_level = 'basic', stripe_subscription_id = NULL, also_serves = '[]'
          WHERE user_id = ?`
       ).bind(userId).run();
     }
