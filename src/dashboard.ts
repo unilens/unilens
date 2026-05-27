@@ -26,7 +26,8 @@ export async function dashboardPage(c: AppContext) {
   const tierConfig = TIERS[getTier(profile?.subscription_level ?? 'basic')];
   // Resolve the currently-selected university for server-side render
   const currentUniv = universities.find(u => u.name === profile?.university);
-  const currentIcon = currentUniv?.svg ?? '';
+  const rawIcon = currentUniv?.svg ?? '';
+  const currentIcon = rawIcon.replace(/`/g, '&#96;').replace(/\$\{/g, '&#36;{');
   const currentLabel = profile?.university ?? 'Select university...';
   const layoutMode = profile?.layout_mode ?? 'simple';
   const gridImages: string[] = JSON.parse(profile?.grid_images ?? '[]');
@@ -39,13 +40,13 @@ export async function dashboardPage(c: AppContext) {
     </div>`).join('');
 
   // Build the dropdown option list
+  const safeSvg = (s: string) => s.replace(/`/g, '&#96;').replace(/\$\{/g, '&#36;{');
   const univOptions = universities.map(u => {
     const selected = profile?.university === u.name ? ' selected' : '';
-    // Escape the name for use in a data-attribute
     const safeName = u.name.replace(/"/g, '&quot;');
     return `
       <div class="univ-option${selected}" data-name="${safeName}">
-        <span class="univ-opt-icon">${u.svg}</span>
+        <span class="univ-opt-icon">${safeSvg(u.svg)}</span>
         <span>${u.name}</span>
       </div>`;
   }).join('');
@@ -924,7 +925,7 @@ export async function dashboardPage(c: AppContext) {
         return '<span class="also-tag" data-name="' + name.replace(/"/g, '&quot;') + '" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;padding:4px 10px;border:1.5px solid var(--color-border);border-radius:var(--radius-full);background:white;">' +
           iconHtml.replace('<svg ', '<svg width="14" height="14" ') +
           name +
-          '<button onclick="removeAlsoServes(\'' + name.replace(/'/g, "\\'") + '\')" style="background:none;border:none;cursor:pointer;padding:0;font-size:14px;line-height:1;color:var(--color-text-muted);">\xd7</button>' +
+          '<button onclick="removeAlsoServes(' + JSON.stringify(name) + ')" style="background:none;border:none;cursor:pointer;padding:0;font-size:14px;line-height:1;color:var(--color-text-muted);">\xd7</button>' +
           '</span>';
       }).join('');
       var lbl = document.getElementById('also-serves-count-label');
