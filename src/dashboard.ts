@@ -106,7 +106,7 @@ export async function dashboardPage(c: AppContext) {
 
     .divider { background: var(--color-border); }
 
-    .panel { padding: 2rem; overflow-y: auto; }
+    .panel { padding: 2rem; }
 
     .panel-title {
       font-size: 11px;

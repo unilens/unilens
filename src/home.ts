@@ -5,7 +5,7 @@ import { getUniversitySvg } from './universities';
 import { TIERS, getTier } from './tiers';
 import { biasOrderClause } from './search-bias';
 import { esc } from './escape';
-
+import { universities as allUniversities } from './universities';
 
 type AppContext = Context<{ Bindings: Env; Variables: Variables }>;
 
@@ -133,9 +133,7 @@ export async function homePage(c: AppContext) {
     LIMIT ? OFFSET ?
   `).bind(search, search, university, university, university, university, filterPriceMin, filterPriceMin, filterPriceMax, filterPriceMax, PAGE_SIZE, offset).all<Photographer>();
 
-  const universities = await c.env.unilens_db.prepare(`
-    SELECT DISTINCT university FROM photographer_profiles WHERE university IS NOT NULL ORDER BY university
-  `).all<{ university: string }>();
+  // universities imported from static list — no DB query needed
 
   const cards = result.results.length > 0
         ? result.results.map(p => photographerCard(p, String(user?.role ?? ''), savedSet)).join('')
@@ -170,16 +168,17 @@ export async function homePage(c: AppContext) {
     ? getUniversitySvg(university).replace('<svg ', '<svg width="20" height="20" ')
     : '';
 
-  const universityOptions = universities.results.map(u => {
-    const icon = getUniversitySvg(u.university);
-    const sized = icon ? icon.replace('<svg ', '<svg width="22" height="22" ') : '';
-    const sel = university === u.university ? ' selected' : '';
-    return `
-    <div class="univ-filter-option${sel}" data-value="${u.university.replace(/"/g, '&quot;')}">
+  const universityOptions = allUniversities
+    .filter(u => u.name !== 'None')
+    .map(u => {
+      const sized = u.svg.replace('<svg ', '<svg width="22" height="22" ');
+      const sel = university === u.name ? ' selected' : '';
+      return `
+    <div class="univ-filter-option${sel}" data-value="${u.name.replace(/"/g, '&quot;')}">
       <span class="univ-filter-opt-icon">${sized}</span>
-      <span>${u.university}</span>
+      <span>${u.name}</span>
     </div>`;
-  }).join('');
+    }).join('');
 
   const html = `<!DOCTYPE html>
 <html lang="en">
