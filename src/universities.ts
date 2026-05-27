@@ -16,7 +16,6 @@ export function getUniversitySvg(name: string): string {
 }
 
 export const universities: University[] = [
-  { name: 'None',                                          color1: '000000', color2: 'ffffff', short: 'N/A'  },
   { name: 'University of Georgia',                         color1: 'BA0C2F', color2: 'ffffff', short: 'UGA'  },
   { name: 'University of Vermont',                         color1: '077e23', color2: 'FFD700', short: 'UVM'  },
   { name: 'Georgia Institute of Technology',               color1: '003057', color2: 'B3A369', short: 'GT'   },
