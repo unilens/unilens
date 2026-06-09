@@ -21,11 +21,17 @@ import { pricingPage } from './pricing';
 import { adminPage, adminLogin, adminSetTier, adminLogout } from './admin';
 import { theme, favicon, topbarStyles, topbar, logoSvg, footer } from './theme';
 import { sitemapXml } from './sitemap';
+import { faviconIco } from './favicon-ico';
+
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
 app.use('*', csrfMiddleware);
 
 // Public routes
+app.get('/favicon.ico', c => c.body(faviconIco.buffer as ArrayBuffer, 200, {
+  'Content-Type': 'image/x-icon',
+  'Cache-Control': 'public, max-age=31536000',
+}));
 app.get('/auth/login',    googleLogin);
 app.get('/auth/callback', googleCallback);
 app.post('/auth/complete', completeRegistration);
