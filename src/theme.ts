@@ -300,7 +300,9 @@ export function ogTags({ title, description, image }: {
   <meta name="twitter:image" content="${img}">`;
 }
 
-export const favicon = `<link rel="icon" type="image/svg+xml" href="/favicon.svg">`;
+export const favicon = `<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">`;
+
 
 export const footer = `
 <footer style="border-top:1.5px solid var(--color-border);padding:1.5rem 2rem;display:flex;align-items:center;justify-content:center;gap:2rem;flex-wrap:wrap;font-size:13px;color:var(--color-text-muted);margin-top:auto;">
